@@ -13,8 +13,8 @@
 
 #large files
 /public/graphics/ocean.mp4
-/public/graphics/headshot/*
-/public/graphics/headshot_images/*
+/public/graphics/headshot
+/public/graphics/headshot_images
 
 # misc
 .DS_Store
