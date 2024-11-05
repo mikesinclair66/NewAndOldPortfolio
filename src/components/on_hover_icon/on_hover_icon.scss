@@ -1,0 +1,28 @@
+.on-hover-icon{
+    .icon, .hover-icon{
+        transition: 0.2s;
+
+        img{
+            height: 42px;
+        }
+    }
+
+    .icon{
+        position: absolute;
+    }
+    
+    .hover-icon, .hover-icon-enabled{
+        opacity: 0;
+        position: relative;
+    }
+
+    .hover-icon{
+        &:hover, &:active {
+            opacity: 1;
+        }
+    }
+
+    .hover-icon-enabled{
+        opacity: 1;
+    }
+}

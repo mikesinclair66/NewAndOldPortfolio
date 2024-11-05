@@ -1,0 +1,54 @@
+.video-container{
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    left: 0;
+
+    video::-webkit-media-controls{
+        display: none !important;
+    }
+
+    video::-webkit-media-controls-panel{
+        display: none !important;
+        opacity: 1 !important;
+        pointer-events: none !important;
+    }
+
+    video{
+        position: absolute;
+        z-index: -1;
+        width: 100%;
+        object-fit: cover;
+    }
+}
+
+.bc-size-dist{
+    width: 100%;
+    position: absolute;
+    top: 0;
+}
+
+.content-loading-signal, .content-loading-signal-vanished, .bc-blur, .bc-blur-inactive{
+    transition: 0.4s;
+}
+
+.content-loading-signal, .content-loading-signal-vanished{
+    z-index: -1;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.35);
+}
+
+.content-loading-signal-vanished{
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.bc-blur, .bc-blur-inactive{
+    backdrop-filter: blur(8px);
+    height: 100vh;
+    pointer-events: none;
+}
+
+.bc-blur-inactive {
+    backdrop-filter: blur(0);
+}

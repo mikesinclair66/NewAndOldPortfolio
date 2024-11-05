@@ -1,0 +1,119 @@
+#ss-0{
+    background-image: url('../../../../public/graphics/ocean_wallpaper.png');
+    background-size: cover;
+
+    #splash-content-container{
+        #sc{
+            #sc-title, .custom-landing-buttons, .custom-landing-buttons-anim{
+                padding-left: 8px;
+            }
+
+            #sc-title{
+                margin-top: 6px;
+                margin-bottom: 14px;
+
+                h1{
+                    font-size: 66px;
+                    font-weight: 800;
+                    line-height: 1.1em;
+                    margin-bottom: 7px;
+                }
+
+                h3{
+                    font-size: 26px;
+                    padding-right: 8px;
+                    font-weight: 500;
+                }
+            }
+
+            #clb-0{
+                display: inline-block;
+            }
+        }
+    }
+
+    #tv-container-abs{
+        display: none;
+        position: absolute;
+        bottom: 12px;
+        right: 0px;
+
+        .tca, .tca-anim{
+            gap: 12px;
+
+            #speech-bubble{
+                position: absolute;
+                z-index: -1;
+                right: 106px;
+                bottom: 152px;
+            }
+
+            #tv{
+                #clam-shells img{
+                    transition: 0.3s linear;
+                    position: absolute;
+                    z-index: 3;
+                    height: 54px;
+                }
+
+                #tv-headshot{
+                    transition: 0.5s;
+                    position: relative;
+                    z-index: 4;
+                    top: 0;
+                }
+            }
+        }
+
+        .tca{
+            cursor: pointer;
+        }
+
+        .tca-anim{
+            cursor: default;
+
+            #speech-bubble{
+                .bubble{
+                    display: none;
+                }
+            }
+
+            #tv #tv-headshot{
+                top: 180px;
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 750px) and (min-height: 500px){
+    #ss-0{
+        background-image: none;
+
+        #splash-content-container{
+            #sc{
+                #sc-title, .custom-landing-buttons, .custom-landing-buttons-anim{
+                    padding-left: 0;
+                }
+    
+                #sc-title{
+                    margin-bottom: 12px;
+    
+                    h1{
+                        font-size: 72px;
+                        line-height: normal;
+                        margin-bottom: 0;
+                    }
+        
+                    h3{
+                        font-size: 30px;
+                        padding-right: 0;
+                    }
+                }
+            }
+        }
+    
+        #tv-container-abs{
+            display: block;
+        }
+    }
+}

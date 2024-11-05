@@ -1,0 +1,122 @@
+#ss-2{
+    #lol{
+        #main-interface{
+            #projects-list{
+                #pl-legend{
+                    #legend-icon-forecast{
+                        .lif-icon-row{
+                            gap: 8px;
+                            margin-bottom: 8px;
+
+                            &:first-child{
+                                margin-top: 8px;
+                            }
+
+                            &:last-child{
+                                margin-bottom: 0;
+                            }
+
+                            .lif-label-col, .lif-icon-col{
+                                width: 33.333%;
+                            }
+
+                            .lif-label-col{
+                                &:first-child{
+                                    text-align: right;
+                                }
+
+                                /*
+                                .lif-icon-label{
+
+                                }
+                                */
+                            }
+
+                            .lif-icon-col{
+                                gap: 8px;
+
+                                .lif-icon{
+                                    height: 54px;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                /*
+                #pl-legend{
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                    padding: 16px;
+
+                    .legend-bar{
+                        flex: 1 1 calc(25% - 16px);
+                        min-width: 184px;
+                        box-sizing: border-box;
+                        padding: 16px;
+                        background-color: #595959;
+                        border: 1px solid #ddd;
+                        text-align: center;
+
+                        .lc-inner-left{
+                            width: 80%;
+                            gap: 8px;
+
+                            img{
+                                height: 28px;
+                            }
+    
+                            .legend-text{
+                                text-align: left;
+    
+                                .legend-header{
+                                    color: rgba(255, 255, 255, 0.7);
+                                    font-size: 14px;
+                                }
+    
+                                .legend-label{
+                                    font-size: 17px;
+                                }
+                            }
+                        }
+
+                        .lc-inner-right{
+                            width: 20%;
+
+                            .arrow-clickon{
+                                width: 22px;
+                                height: 22px;
+                                padding: 4px;
+                                background-color: #3b3b3b;
+                                border-radius: 4px;
+    
+                                div{
+                                    margin-top: -5px;
+                                    margin-left: -2.5px;
+                                    transform: rotate(-90deg);
+                                }
+                            }
+                        }
+                    }
+                    */
+                    /*
+                    #legend-category{
+
+                    }
+
+                    #legend-platform{
+
+                    }
+
+                    #legend-size{
+
+                    }
+                    */
+                    /*
+                }
+                    */
+            }
+        }
+    }
+}

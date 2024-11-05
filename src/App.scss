@@ -1,0 +1,236 @@
+body, h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Akagi-pro", sans-serif;
+}
+
+h3, h4, h5, h6 {
+    font-size: 22px;
+}
+
+h5, h6{
+    font-size: 20px;
+}
+
+p, div, input, button, span, li{
+    font-family: Inter, sans-serif;
+}
+
+p{
+    font-size: 18px;
+}
+
+img{
+    max-width: 100%;
+    max-height: 100%;
+}
+
+[class*='align']{
+    display: flex;
+}
+
+.align-vertical-reverse{
+    align-items: center;
+    flex-direction: column-reverse;
+}
+
+.align-horizontal, .align-center{
+    justify-content: center;
+}
+
+.align-vertical, .align-center{
+    align-items: center;
+}
+
+.align-left{
+    justify-content: left;
+}
+
+.align-right{
+    justify-content: right;
+}
+
+.align-bottom{
+    align-items: flex-end;
+}
+
+.fill, .fill-vh{
+    width: 100%;
+}
+
+.fill{
+    height: 100%;
+}
+
+.fill-vh{
+    height: 100vh;
+}
+
+.button-caption{
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.custom-landing-buttons, .custom-landing-buttons-anim{
+    .clb-first{
+        transition: 0.7s ease-in;
+        background-color: rgba(0, 0, 0, 0.3);
+        position: absolute;
+        clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    }
+
+    .clb-second{
+        transition: 0.2s;
+        position: relative;
+    }
+
+    .custom-landing-button{
+        display: inline-block;
+        border: solid #212529 3px;
+        border-radius: 4px;
+        padding: 6px 8px;
+        cursor: pointer;
+
+        .clb-inner{
+            gap: 8px;
+        }
+    }
+}
+
+.custom-landing-buttons-anim{
+    .clb-first{
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .clb-second{
+        color: white;
+
+        .hover-icon{
+            opacity: 1;
+        }
+    }
+}
+
+.road-btn{
+    cursor: pointer;
+    padding-top: 6px;
+    padding-left: 6px;
+
+    .road-btn-inner{
+        .road-layer{
+            border-radius: 6px;
+            border: solid black 2px;
+            height: 56px;
+            width: 128px;
+
+            
+        }
+
+        .road-top{
+            background-color: #f77fe3;
+            position: relative;
+            margin-top: -6px;
+            margin-left: -6px;
+
+            .road-msg{
+                font-size: 17px;
+                color: black;
+            }
+
+            img{
+                width: 28px;
+            }
+        }
+
+        .road-bottom{
+            background-color: black;
+            opacity: 0;
+            margin-top: -53px;
+            margin-left: 0;
+        }
+    }
+
+    &:hover, &:active{
+        .road-btn-inner{
+            .road-top{
+                
+            }
+
+            .road-bottom{
+                opacity: 1;
+            }
+        }
+    }
+}
+
+.introduction-container{
+    width: 100%;
+    margin-bottom: 32px;
+
+    .introduction{
+        width: 740px;
+        padding-top: 32px;
+        padding-bottom: 8px;
+    }
+}
+
+.continue-flex{
+    width: 100%;
+    gap: 12px;
+}
+
+.react-link{
+    transition: 0.2s;
+    display: inline-block;
+    text-decoration: underline;
+    cursor: pointer;
+    color: white;
+
+    &:hover, &:active{
+        color: rgb(224, 224, 224);
+    }
+}
+
+/*
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+  */

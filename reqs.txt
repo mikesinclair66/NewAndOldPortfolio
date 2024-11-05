@@ -1,0 +1,11 @@
+bootstrap
+sass sass-loader
+react-router-dom
+three @react-three/fiber @react-three/drei
+npm install --save @vue/web-component-wrapper
+
+npm install -g @vue/cli
+vue create subapp
+
+```
+Loaded as react project with typescript template
