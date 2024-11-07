@@ -1,7 +1,6 @@
 import Anim from "../../../components/Anim";
 import NestedProps from "./NestedProps";
 import React, { useState, useEffect, useRef } from 'react';
-import ScrollableDiv from '../../../components/ScrollableDiv';
 
 const FilterCol: React.FC<NestedProps>
 = ({ desktopImplementation, categoryFilter, dbScreen, platformFilter, sizeFilter, scrollLock, enabled,
@@ -45,16 +44,16 @@ const FilterCol: React.FC<NestedProps>
                 window.addEventListener('pointerup', handleSliderReleased);
             });
 
-            /*
-            sliderRef.current.addEventListener('mouseenter', handleSliderEnter);
-            sliderRef.current.addEventListener('mouseleave', handleSliderExit);
-            */
+            // sliderRef.current.addEventListener('mouseenter', handleSliderEnter);
+            // sliderRef.current.addEventListener('mouseleave', handleSliderExit);
         }
     }, [desktopImplementation]);
     
     if(!desktopImplementation && dbScreen)
         return (<div></div>);
     else return (
+        <div>
+        {/*
         <ScrollableDiv id="filter-col" desktopImplementation={desktopImplementation} speed={20} enabled={enabled}
         scrollLock={scrollLock} pauseScrollLock={pauseScrollLock}>
             <div id="mi-header" className="fc-section align-center">
@@ -305,6 +304,8 @@ const FilterCol: React.FC<NestedProps>
                 </Anim>
             </div>
         </ScrollableDiv>
+        */}
+        </div>
     );
 }
 

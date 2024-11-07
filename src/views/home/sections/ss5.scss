@@ -108,8 +108,14 @@
                             }
                         }
 
-                        #fc-btn .road-btn .road-btn-inner .road-layer{
-                            width: 285px;
+                        #fc-btn .road-btn .road-btn-inner{
+                            .road-layer{
+                                width: 285px;
+                            }
+                            
+                            .road-top{
+                                background-color: #ECB807;
+                            }
                         }
                     }
             

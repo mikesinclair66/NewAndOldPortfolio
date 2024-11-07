@@ -8,7 +8,6 @@ import scroll_to_bottom from "src/assets/scripts/scroll_to_bottom";
 import wait from '../../assets/scripts/wait.js';
 
 import React, { useState, useEffect, useRef } from 'react';
-import debug_dict from "src/assets/scripts/debug_dict";
 
 const Home: React.FC = () => {
     const [tvVaporized, setTvVaporized] = useState<boolean>(false);
@@ -18,7 +17,6 @@ const Home: React.FC = () => {
     const sectionIdentifier = useRef<number>(0);
     const ss2 = useRef<any>(null);
     const scrollDetectorLock = useRef<boolean>(false);//detects sectionId
-    const scrollToOverrideLocked = useRef<boolean>(false);//blocks window.scrollTo
     const scrollFunctionAdded = useRef<boolean>(false);
 
     const lockScrollDetector = () => {
@@ -26,31 +24,7 @@ const Home: React.FC = () => {
         wait(500, () => scrollDetectorLock.current = false);
     }
 
-    const scrollFunction = (ev: WheelEvent) => {
-        let returnToLock = sectionIdentifier.current == 3 && !scrollDetectorLock.current && ev.deltaY < 0
-        && ss2.current && window.scrollY <= ss2.current.offsetTop + ss2.current.offsetHeight + 50;
-
-        if(sectionIdentifier.current != 3 || returnToLock)
-            ev.preventDefault();
-        if(returnToLock)
-            setSectionId(2);
-
-        if(sectionIdentifier.current != 3 && !scrollDetectorLock.current){
-            lockScrollDetector();
-
-            if(ev.deltaY > 0){
-                if(!tvVaporized)
-                    setTvVaporized(true);
-                if(sectionIdentifier.current + 1 <= 3)
-                    setSectionId(sectionIdentifier.current + 1);
-            } else if(ev.deltaY < 0 && sectionIdentifier.current - 1 >= 0)
-                setSectionId(sectionIdentifier.current - 1);
-        }
-    }
-
     const handleScrollTransition = (sectionId: number) => {
-        lockScrollDetector();
-
         let compareSnapLevel = (v1: number, v2: number) => v1 == 1 && v2 == 2;
         let onSameSnapLvl = false;
         if(compareSnapLevel(sectionIdentifier.current, sectionId) || compareSnapLevel(sectionId, sectionIdentifier.current))
@@ -73,7 +47,7 @@ const Home: React.FC = () => {
                 break;
         }
 
-        if(!onSameSnapLvl && !scrollToOverrideLocked.current){
+        if(!onSameSnapLvl){
             const sec = document.getElementById('ss-' + snap);
             if(sec)
                 window.scrollTo({ top: sec.offsetTop, behavior: 'smooth' });
@@ -87,6 +61,60 @@ const Home: React.FC = () => {
         }
 
         scroll_to_bottom();
+    }
+
+    const scrollFunction = (ev: WheelEvent) => {
+        if(!scrollDetectorLock.current){
+            let proceedSection = (ev: WheelEvent) => {
+                ev.preventDefault();
+                lockScrollDetector();
+                setSectionId(sectionIdentifier.current + (ev.deltaY > 0 ? 1 : -1))
+            };
+
+            switch(sectionIdentifier.current){
+                case 3:
+                    if(ev.deltaY < 0 && ss2.current && window.scrollY <= ss2.current.offsetTop + ss2.current.offsetHeight + 50)
+                        proceedSection(ev);
+                    break;
+                case 2:
+                    let coords = [ev.clientX, ev.clientY];
+                    let checkContainer = (containerId: string, coords: number[]): boolean => {
+                        let container = document.getElementById(containerId);
+                        let crect = container?.getBoundingClientRect();
+
+                        // coords are within container
+                        return (container != undefined && crect != undefined && coords[0] >= crect.left
+                        && coords[0]< crect.left + crect.width && coords[1] >= crect.top && coords[1] < crect.top + crect.height)
+                        
+                        &&
+                        
+                        // container has a scrollbar - otherwise [FAILCASE = scroll proceeds to the next section]
+                        container.scrollHeight > container.clientHeight
+                        
+                        &&
+                        
+                        // container scrollbar isn't at the bottom when the user scrolls down - otherwise FAILCASE
+                        ((container.scrollHeight - container.scrollTop - container.clientHeight >= 1 && ev.deltaY > 0)
+                    
+                        ||
+                    
+                        // container scrollbar isn't at the top when the user scrolls up - otherwise FAILCASE
+                        (container.scrollTop !== 0 && ev.deltaY < 0));
+                    }
+
+                    if(!checkContainer('filter-col', coords) && !checkContainer('projects-list', coords))
+                        proceedSection(ev);
+                    break;
+                case 0:
+                    // fall-through
+                    if(ev.deltaY > 0 && !tvVaporized)
+                        setTvVaporized(true);
+                default:
+                    proceedSection(ev);
+                    break;
+            }
+        } else
+            ev.preventDefault();
     }
 
     useEffect(() => {
@@ -126,8 +154,7 @@ const Home: React.FC = () => {
             tvVaporized={tvVaporized} setTvVaporized={() => { handleScrollTransition(1); setTvVaporized(true); }} />
             <Ss1 desktopImplementation={desktopImplementation}
             horizontalSlideToggled={sectionId > 1} toggleHorizontalSlide={() => setSectionId(2)} />
-            <Ss2 desktopImplementation={desktopImplementation} enabled={sectionId == 2} scrollLock={scrollDetectorLock.current}
-            pauseScrollLock={(val: boolean) => scrollDetectorLock.current = val} />
+            <Ss2 desktopImplementation={desktopImplementation} />
             <Ss3 desktopImplementation={desktopImplementation} getInTouch={getInTouch} />
             <Ss4 desktopImplementation={desktopImplementation} />
             <Ss5 desktopImplementation={desktopImplementation} />
