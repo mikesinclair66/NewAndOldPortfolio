@@ -127,7 +127,8 @@ const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFun
                             <div className="align-center clb-inner" style={{ opacity: 0, pointerEvents: 'none' }}>
                                 <span className="button-caption">Get In Touch</span>
                                 <OnHoverIcon iconSrc="/graphics/media/gmail_black.png"
-                                hoverSrc="/graphics/media/gmail.png" alt="Email Michael" />
+                                hoverSrc="/graphics/media/gmail.png" alt="Email Michael"
+                                desktopImplementation={desktopImplementation} />
                             </div>
                         </div>
 
@@ -136,7 +137,8 @@ const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFun
                             <div className="align-center clb-inner">
                                 <span className="button-caption">Get In Touch</span>
                                 <OnHoverIcon iconSrc="/graphics/media/gmail_black.png"
-                                hoverSrc="/graphics/media/gmail.png" alt="Email Michael" />
+                                hoverSrc="/graphics/media/gmail.png" alt="Email Michael"
+                                desktopImplementation={desktopImplementation} />
                             </div>
                         </div>
                     </Anim>

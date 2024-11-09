@@ -3,6 +3,14 @@
         #lol{
             color: white;
 
+            .dark-translucent{
+                background-color: rgba(40, 45, 84, 0.6);
+            }
+
+            .filters-translucent{
+
+            }
+
             #main-interface, #main-interface #filter-col{
                 border-radius: 0 0 0 27px;
             }
@@ -14,10 +22,23 @@
             #main-interface{
                 height: 320px;
 
+                .cursor-highlight{
+                    transition: 0.2s;
+                    cursor: default;
+                    display: inline-block;
+
+                    &:hover, &:active{
+                        background-color: rgba(77, 87, 166, 0.6);
+                    }
+                }
+
+                #filter-col #mi-header, #filter-col .fc-section .fc-header, #projects-list #pl-header{
+                    height: 48px;
+                }
+
                 #filter-col, #projects-list{
                     height: 100%;
                     overflow-y: auto;
-                    border-radius: 27px;
     
                     &::-webkit-scrollbar {
                         width: 7px;
@@ -39,14 +60,10 @@
                 }
     
                 #filter-col{
+                    border-radius: 27px;
                     width: 260px;
     
-                    #mi-header, .fc-section .fc-header{
-                        height: 48px;
-                    }
-    
                     #mi-header{
-                        background-color: rgba(40, 45, 84, 0.6);
                         border-bottom: solid rgba(157, 168, 255, 0.25) 1px;
                         border-radius: 27px 0 0 0;
                     }
@@ -55,7 +72,6 @@
                         .fc-header{
                             padding-left: 17px;
                             padding-right: 12px;
-                            background-color: rgba(40, 45, 84, 0.6);
     
                             .fch-inner{
                                 width: 100%;
@@ -81,20 +97,12 @@
                                         border-radius: 3px;
                                         width: 18px;
                                         height: 18px;
-                                        border: solid white 2px;
+                                        border-width: 2px;
+                                        border-style: solid;
 
                                         .collapse-icon{
                                             margin-top: 9px;
                                             font-size: 22px;
-
-                                            &:hover, &:active{
-                                                color: rgba(40, 45, 84, 0.6);
-                                            }
-                                        }
-
-                                        &:hover, &:active{
-                                            box-shadow: 0 0 7px #f8f8f8;
-                                            background-color: white;
                                         }
                                     }
 
@@ -102,6 +110,16 @@
                                         margin-top: 0;
                                         transform-origin: 5px 12px;
                                         transform: rotate(180deg);
+                                    }
+
+                                    .fcc-anim{
+                                        border-color: white;
+
+                                        &:hover, &:active{
+                                            box-shadow: 0 0 7px #f8f8f8;
+                                            background-color: white;
+                                            color: rgba(40, 45, 84, 0.6);
+                                        }
                                     }
                                 }
                             }
@@ -137,19 +155,13 @@
                                             transform: translate(-50%, -50%);
                                             border-radius: 2px;
                                             width: calc(100% - 8px);
-                                            height: calc(100% - 10px);
+                                            height: calc(100% - 9.25px);
                                             background-color: whitesmoke;
                                         }
                                     }
 
                                     .radio-label{
-                                        transition: 0.2s;
                                         font-size: 17px;
-                                        cursor: default;
-
-                                        &:hover, &:active{
-                                            background-color: rgba(77, 87, 166, 0.6);
-                                        }
                                     }
                                 }
                             }
@@ -210,18 +222,49 @@
                 }
 
                 #projects-list{
-                    background-color: rgba(55, 83, 99, 0.6);
-                    width: 350px;
+                    background-color: rgba(52, 79, 108, 0.6);
+                    border-radius: 0 0 27px 27px;
+                    width: 320px;
     
                     #pl-header{
-                        height: 50px;
+                        margin-top: 2px;
     
                         .pls{
                             height: 100%;
                         }
-    
+
                         #pl-left, #pl-right{
                             width: 12.5%;
+                        }
+
+                        #pl-center{
+                            width: 75%;
+
+                            .header-label{
+                                padding: 3px 11px;
+                                position: relative;
+                                background: rgba(255, 255, 255, 0.2);
+                                border-radius: 15px;
+                                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                                color: white;
+                                overflow: hidden;
+                                box-sizing: border-box;
+                                pointer-events: none;
+                            }
+
+                            .header-label::before{
+                                content: "";
+                                border-radius: inherit;
+                                position: absolute;
+                                top: 2px;
+                                left: 2px;
+                                right: 2px;
+                                bottom: 2px;
+                                padding: 2px;
+                                background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 28px);
+                                pointer-events: none;
+                                z-index: -1;
+                            }
                         }
     
                         #pl-left #ab-back, #pl-right img{
@@ -236,15 +279,11 @@
     
                                 #arrow-back{
                                     position: relative;
-                                    left:6px;
-                                    bottom: 11px;
+                                    left: 6px;
+                                    bottom: 7px;
                                     font-size: 28px;
                                 }
                             }
-                        }
-    
-                        #pl-center{
-                            width: 75%;
                         }
     
                         #pl-right{
@@ -255,46 +294,58 @@
                             }
                         }
                     }
+
+                    .pl-header-1 #pl-right, .pl-header-2 #pl-left, .pl-header-2 #pl-right{
+                        pointer-events: none;
+                        opacity: 0;
+                    }
+
+                    #pl-body #pl-legend{
+                        #pll-icon-title{
+                            display: none;
+                        }
+
+                        #pll-inner{
+                            .lif-icon-row{
+                                gap: 8px;
+                                margin-bottom: 8px;
+                                height: 58px;
     
-                    #pl-gallery{
-                        .pl-card{
-                            .thumbnail{
-                                padding: 8px;
-                                border-radius: 28px;
+                                &:first-child{
+                                    margin-top: 8px;
+                                }
+    
+                                &:last-child{
+                                    margin-bottom: 0;
+                                }
+    
+                                .lif-label-col, .lif-icon-col{
+                                    width: 33.333%;
+                                    height: 100%;
+                                }
+    
+                                .lif-label-col{
+                                    &:first-child{
+                                        text-align: right;
+                                    }
+                                }
+    
+                                .lif-icon-col{
+                                    gap: 8px;
+    
+                                    .on-hover-icon{
+                                        cursor: pointer;
+                                        height: 54px;
+                                        position: relative;
+                                        top: 7px;
+                                    }
+                                }
                             }
     
-                            .pl-card-info{
-                                .plci-left, .plci-right{
-                                    width: 50%;
-                                }
-    
-                                .plci-left{
-                                    padding-left: 8px;
-    
-                                    .plci-header{
-    
-                                    }
-    
-                                    .plci-caption{
-                                        color: rgb(154, 183, 208);
-                                        font-size: 15px;
-                                    }
-                                }
-    
-                                .plci-right{
-                                    margin-top: 3px;
-                                    padding-right: 8px;
-    
-                                    .plci-right-inner{
-                                        gap: 5px;
-    
-                                        .filter-icon{
-                                            width: 28px;
-                                        }
-                                    }
-    
-                                    .project-size-bars{
-                                        margin-top: 10px;
+                            #lir-size{
+                                .lif-icon-col{
+                                    #badge{
+                                        display: none;
                                     }
                                 }
                             }
@@ -306,8 +357,7 @@
             #fr-container #filter-row{
                 display: inline-block;
                 margin-top: 14px;
-                border-radius: 20px;
-                background-color: rgba(44, 46, 61, 0.6);
+                border-radius: 27px;
                 padding: 8px 18px 8px 18px;
     
                 .fr, .fr-selected{
@@ -345,12 +395,111 @@
         #ss-2-inner{
             #lol{
                 #main-interface{
+                    height: 498px;
+
                     #filter-col{
-                        border-radius: 27px 0 0 27px;
+                        border-radius: 40px 0 0 40px;
                     }
     
                     #projects-list{
-                        border-radius: 0 27px 27px 0;
+                        border-radius: 0 40px 40px 0;
+                        width: 600px;
+
+                        #pl-header #pl-center .header-label, #pl-body #pl-legend #pll-inner{
+                            width: 500px;
+                        }
+
+                        #pl-header{
+                            #pl-center{
+                                .header-label{
+                                    border-radius: 15px 15px 0 0;
+                                    box-shadow: none;
+                                    margin-bottom: -17px;
+
+                                    #hl-inner{
+                                        position:relative;
+                                        top:1px;
+                                        left:1px;
+                                    }
+                                }
+
+                                .header-label::before{
+                                    top: 2px;
+                                    left: 2px;
+                                    right: 2px;
+                                    bottom: 2px;
+                                    padding: 2px;
+                                }
+                            }
+                        }
+
+                        #pl-body #pl-legend{
+                            #pll-icon-title{
+                                display: block;
+                            }
+
+                            #pll-inner{
+                                padding: 3px 0;
+                                height: 68px;
+                                border-radius: 0 0 15px 15px;
+
+                                .lif-icon-row{
+                                    width: 104px;
+                                    height: 100%;
+
+                                    .lif-label-col{
+                                        display: none;
+                                    }
+
+                                    .lif-icon-col{
+                                        width: 100%;
+                                        height: 100%;
+
+                                        .on-hover-icon{
+                                            transition: 0.2s;
+                                            top: -4px;
+                                            height: 32px;
+
+                                            &:hover, &:active{
+
+                                            }
+                                        }
+
+                                        #mobile-icon{
+                                            margin-top: -6px;
+                                        }
+                                    }
+
+                                    &:first-child, &:last-child{
+                                        position: static;
+                                    }
+                                    position: relative;
+                                    top: 4px;
+                                }
+
+                                #lif-squished-row{
+                                    width: 114px;
+                                }
+
+                                #lir-size{
+                                    margin-left: 12px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 1200px) and (min-height: 500px){
+    #ss-2{
+        #ss-2-inner{
+            #lol{
+                #main-interface{
+                    #projects-list{
+                        width: 680px;
                     }
                 }
             }

@@ -2,46 +2,7 @@
     #lol{
         #main-interface{
             #projects-list{
-                #pl-legend{
-                    #legend-icon-forecast{
-                        .lif-icon-row{
-                            gap: 8px;
-                            margin-bottom: 8px;
-
-                            &:first-child{
-                                margin-top: 8px;
-                            }
-
-                            &:last-child{
-                                margin-bottom: 0;
-                            }
-
-                            .lif-label-col, .lif-icon-col{
-                                width: 33.333%;
-                            }
-
-                            .lif-label-col{
-                                &:first-child{
-                                    text-align: right;
-                                }
-
-                                /*
-                                .lif-icon-label{
-
-                                }
-                                */
-                            }
-
-                            .lif-icon-col{
-                                gap: 8px;
-
-                                .lif-icon{
-                                    height: 54px;
-                                }
-                            }
-                        }
-                    }
-                }
+                
 
                 /*
                 #pl-legend{

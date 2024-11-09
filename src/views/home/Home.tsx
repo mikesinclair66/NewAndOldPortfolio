@@ -132,6 +132,13 @@ const Home: React.FC = () => {
         ss2.current = document.getElementById('ss-2');
 
         if(desktopImplementation){
+            if(window.scrollY < ss2.current.offsetTop)
+                setSectionId(0);
+            else {
+                let ss3 = document.getElementById('ss-3');
+                setSectionId(ss3 && window.scrollY < ss3.offsetTop ? 2 : 3);
+            }
+
             window.addEventListener('wheel', scrollFunction, { passive: false });
             scrollFunctionAdded.current = true;
         } else if(scrollFunctionAdded.current){
