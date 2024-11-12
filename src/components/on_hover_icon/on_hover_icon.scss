@@ -1,5 +1,5 @@
 .on-hover-icon{
-    .icon, .hover-icon{
+    .icon, .hover-icon, .hover-icon-overriden{
         transition: 0.2s;
     }
 
@@ -12,9 +12,11 @@
         position: relative;
     }
 
-    .hover-icon{
-        &:hover, &:active {
-            opacity: 1;
-        }
+    .hover-icon:hover, .hover-icon:active, .hover-icon-overridden{
+        opacity: 1;
+    }
+
+    .hover-icon-overriden{
+        position: relative;
     }
 }

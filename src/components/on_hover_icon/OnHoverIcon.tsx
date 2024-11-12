@@ -1,23 +1,28 @@
 import './on_hover_icon.scss';
-import React from 'react';
+import React, { useEffect } from 'react';
+import PlatformTarget from '../target/PlatformTarget';
+import PTargetInterface from '../target/PTargetInterface';
 
-interface OHIProps extends React.HTMLAttributes<HTMLElement> {
+interface OHIProps extends PTargetInterface {
     iconSrc: string;
     hoverSrc: string;
     alt: string;
-    desktopImplementation: boolean;
+    override?: boolean;
 }
 
-const OnHoverIcon: React.FC<OHIProps> = ({iconSrc, hoverSrc, alt, desktopImplementation, ...props}) => {
+const OnHoverIcon: React.FC<OHIProps> = ({ target, appendedClasses, iconSrc, hoverSrc, alt, desktopImplementation,
+desktopEnabledClasses, mobileEnabledClasses, override, ...props}) => {
     return (
-        <div className="on-hover-icon" {...props}>
+        <PlatformTarget desktopImplementation={desktopImplementation} target={"on-hover-icon" + (target ? ` ${target}` : '')}
+        appendedClasses={appendedClasses} desktopEnabledClasses={desktopEnabledClasses} mobileEnabledClasses={mobileEnabledClasses}
+        {...props}>
             <div className="icon">
                 <img src={iconSrc} alt={alt} />
             </div>
-            <div className='hover-icon'>
+            <div className={`hover-icon${override ? '-overriden' : ''}`}>
                 <img src={hoverSrc} alt={alt} />
             </div>
-        </div>
+        </PlatformTarget>
     )
 }
 

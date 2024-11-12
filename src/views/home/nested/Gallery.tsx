@@ -1,4 +1,4 @@
-import Anim from "../../../components/Anim";
+import Anim from "../../../components/anim/Anim";
 import React, { ReactNode } from "react";
 
 interface GalleryProps {

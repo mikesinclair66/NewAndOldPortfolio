@@ -1,9 +1,12 @@
 import './project_gallery.scss';
 import { useNavigate } from 'react-router-dom';
 
-import Anim from 'src/components/Anim';
+import Anim from 'src/components/anim/Anim';
 import React, { useState, useEffect, useRef } from 'react';
+import PlatformAnim from 'src/components/anim/PlatformAnim';
+import PlatformTarget from 'src/components/target/PlatformTarget';
 import OnHoverIcon from 'src/components/on_hover_icon/OnHoverIcon';
+import debug_dict from 'src/assets/scripts/debug_dict';
 
 interface PGProps {
     desktopImplementation: boolean;
@@ -60,12 +63,6 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
         mobileScreen: new Filter([ 'Filters', 'Gallery', 'Legend' ]).getData()
     });
 
-    const [legendIconHovered, setLegendIconHovered] = useState<any[]>([undefined, undefined]);
-    const hoverOverLegendIcon = (filter: string, selected: number) => {
-        if(desktopImplementation)
-            setLegendIconHovered([filter, selected]);
-    }
-
     const getAnnotationAtIndex = (filter: string, annotation: number = -1) => {
         let _annotation: number;
         if(annotation == -1)
@@ -110,7 +107,7 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
         }));
     }
 
-    // Date range
+// Date range
 
     const FINAL_SCROLL_LEVEL = 11;
     const [scrollLevel, setScrollLevel] = useState<number>(FINAL_SCROLL_LEVEL);
@@ -119,7 +116,7 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
     useEffect(() => {
         setAnnotationToggled('mobileScreen', desktopImplementation ? -1 : 0);
 
-        // Filter date range
+// Filter date range
         const handleSliderDrag = (ev: PointerEvent) => {
             if(sliderRef.current){
                 const sliderRect = sliderRef.current.getBoundingClientRect();
@@ -149,6 +146,25 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
         }
     }, [desktopImplementation]);
 
+//Legend filters hovered
+
+    const [filterHovered, setFilterHovered] = useState<any>({
+        annotation: null,
+        toggled: 0
+    });
+
+    const hoverOverFilter = (annotation: string | null, toggled: number) => {
+        setFilterHovered({
+            annotation: annotation,
+            toggled: toggled
+        });
+    }
+
+    const getFilterHovered = (annotation: string | null, toggled: number) => {
+        return (annotation == null && filterHovered.annotation == null)
+            || (annotation == filterHovered.annotation && toggled == filterHovered.toggled);
+    }
+
     //Project Gallery - plHeader
 
     const [plHeader, setPlHeader] = useState<string>('0');
@@ -169,6 +185,7 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                         <div className="header-label">PROJECT FILTERS</div>
                     </div>
 
+{/* FILTERCOL - DATE */}
                     <div id="date" className="fc-section">
                         <div className='fc-header dark-translucent align-center'>
                             <div className="fch-inner align-horizontal">
@@ -206,6 +223,7 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                         </Anim>
                     </div>
 
+{/* FILTERCOL - PLATFORM */}
                     <div id="platform" className="fc-section">
                         <div className="fc-header dark-translucent align-center">
                             <div className="fch-inner align-horizontal">
@@ -261,6 +279,7 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                         </Anim>
                     </div>
 
+{/* FILTERCOL - PURPOSE */}
                     <div id="purpose" className="fc-section">
                         <div className="fc-header dark-translucent align-center">
                             <div className="fch-inner align-horizontal">
@@ -315,6 +334,7 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                         </Anim>
                     </div>
 
+{/* FILTERCOL - SIZE */}
                     <div id="size" className="fc-section">
                         <div className="fc-header dark-translucent align-center">
                             <div className="fch-inner align-horizontal">
@@ -369,6 +389,7 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                         </Anim>
                     </div>
 
+{/* FILTERCOL - TYPE */}
                     <div id="type" className="fc-section">
                         <div className="fc-header dark-translucent align-center">
                             <div className="fch-inner align-horizontal">
@@ -426,6 +447,7 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
 
                 { ((!desktopImplementation && getAnnotationToggled('mobileScreen') > 0) || desktopImplementation)
                 && <div id="projects-list">
+{/* PROJECTS LIST - mobile navigation */}
                     <div id='pl-header' className={`align-center pl-header-${plHeader}`}>
                         <div id="pl-left" className="pls theme-border align-center"
                         onPointerDown={() => setAnnotationToggled('mobileScreen', getAnnotationToggled('mobileScreen') - 1)}>
@@ -434,14 +456,15 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                             </div>
                         </div>
                         <div id="pl-center" className="pls align-center">
-                            <div className="header-label dark-translucent">
+                            <PlatformAnim toggled={desktopImplementation && filterHovered.annotation != null}
+                            desktopEnabledClasses="glass-card" mobileEnabledClasses="theme-border"
+                            desktopImplementation={desktopImplementation} target="header-label">
                                 <div id="hl-inner">
-                                    { getAnnotationAtIndex('mobileScreen',
-                                    !desktopImplementation ? -1 : 2)?.toUpperCase() }
-                                    { legendIconHovered[0] != undefined && ` - ${filters[legendIconHovered[0]]
-                                        .annotations[legendIconHovered[1]]}` }
+                                    { getAnnotationAtIndex('mobileScreen', !desktopImplementation ? -1 : 2)?.toUpperCase() }
+                                    { filterHovered.annotation != null
+                                    && ` - ${filters[filterHovered.annotation].annotations[filterHovered.toggled]}` }
                                 </div>
-                            </div>
+                            </PlatformAnim>
                         </div>
                         <div id="pl-right" className="pls theme-border align-center"
                         onPointerDown={() => setAnnotationToggled('mobileScreen', 2)}>
@@ -450,9 +473,10 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                     </div>
 
                     <div id="pl-body">
-                        {/* LEGEND */}
+{/* LEGEND */}
                         { ((!desktopImplementation && getAnnotationToggled('mobileScreen') == 2) || desktopImplementation)
-                        && <div id="pl-legend" className={desktopImplementation? 'align-center' : undefined}>
+                        && <PlatformTarget id="pl-legend" desktopEnabledClasses='align-center'
+                        desktopImplementation={desktopImplementation}>
                             {/*
                             <div id="pll-icon-title">
 
@@ -465,41 +489,58 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                                         <div className="lif-icon-label">Software Engineer</div>
                                     </div>
                 
-                                    <div className="lif-icon-col align-center">
-                                        <OnHoverIcon iconSrc="/graphics/legend/gear.png"
-                                        hoverSrc='/graphics/legend/gear_outline.png' alt="Software Engineer"
-                                        desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => setLegendIconHovered(['subject', 1])}
-                                        onMouseLeave={() => setLegendIconHovered([undefined, undefined])} />
-                                        <OnHoverIcon iconSrc="/graphics/legend/java.png"
+    {/* GEAR COL */}
+                                    <PlatformTarget desktopImplementation={desktopImplementation}
+                                    mobileEnabledClasses='glass-card' appendedClasses="lif-icon-col align-center">
+                                        <OnHoverIcon target="lif-icon" desktopEnabledClasses='glass-card align-center'
+                                        iconSrc="/graphics/legend/gear.png" hoverSrc='/graphics/legend/gear_outline.png'
+                                        alt="Software Engineer" desktopImplementation={desktopImplementation}
+                                        onMouseEnter={() => hoverOverFilter('subject', 1)} id="gear-icon"
+                                        onMouseLeave={() => hoverOverFilter(null, 0)}
+                                        override={getFilterHovered('subject', 1)}
+                                        onMouseDown={() => setAnnotationToggled('subject', 1)} />
+
+                                        <OnHoverIcon target="lif-icon" iconSrc="/graphics/legend/java.png"
                                         hoverSrc='/graphics/legend/java_outline.png' alt="Software Developer"
                                         desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => setLegendIconHovered(['subject', 2])}
-                                        onMouseLeave={() => setLegendIconHovered([undefined, undefined])} />
-                                    </div>
+                                        desktopEnabledClasses='glass-card align-center'
+                                        onMouseEnter={() => hoverOverFilter('subject', 2)}
+                                        onMouseLeave={() => hoverOverFilter(null, 0)}
+                                        override={getFilterHovered('subject', 2)}
+                                        onMouseDown={() => setAnnotationToggled('subject', 2)} />
+                                    </PlatformTarget>
                 
                                     <div className="lif-label-col align-center">
                                         <div className="lif-icon-label">Software Developer</div>
                                     </div>
                                 </div>
                 
-                                <div id="lif-squished-row" className="lif-icon-row align">
+                                <div className="lif-icon-row align">
                                     <div className="lif-label-col align-center">
                                         <div className="lif-icon-label">Game Developer</div>
                                     </div>
-                
-                                    <div className="lif-icon-col align-center">
-                                        <OnHoverIcon iconSrc="/graphics/legend/game_controller.png"
+
+    {/* GAME COL */}            
+                                    <PlatformTarget id="squished-icon-row" desktopImplementation={desktopImplementation}
+                                    mobileEnabledClasses='glass-card' appendedClasses="lif-icon-col align-center">
+                                        <OnHoverIcon target="lif-icon" desktopEnabledClasses='glass-card align-center'
+                                        iconSrc="/graphics/legend/game_controller.png"
                                         hoverSrc='/graphics/legend/game_controller_outline.png' alt="Game Developer"
                                         desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => setLegendIconHovered(['subject', 3])}
-                                        onMouseLeave={() => setLegendIconHovered([undefined, undefined])} />
-                                        <OnHoverIcon iconSrc="/graphics/legend/web.png"
+                                        onMouseEnter={() => hoverOverFilter('subject', 3)}
+                                        onMouseLeave={() => hoverOverFilter(null, 0)}
+                                        override={getFilterHovered('subject', 3)}
+                                        onMouseDown={() => setAnnotationToggled('subject', 3)} />
+
+                                        <OnHoverIcon target="lif-icon" iconSrc="/graphics/legend/web.png"
                                         hoverSrc='/graphics/legend/web_outline.png' alt="Web Developer"
                                         desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => setLegendIconHovered(['platform', 1])}
-                                        onMouseLeave={() => setLegendIconHovered([undefined, undefined])} />
-                                    </div>
+                                        desktopEnabledClasses='glass-card align-center'
+                                        onMouseEnter={() => hoverOverFilter('platform', 1)}
+                                        onMouseLeave={() => hoverOverFilter(null, 0)}
+                                        override={getFilterHovered('platform', 1)}
+                                        onMouseDown={() => setAnnotationToggled('platform', 1)} />
+                                    </PlatformTarget>
                 
                                     <div className="lif-label-col align-center">
                                         <div className="lif-icon-label">Web Project</div>
@@ -510,43 +551,71 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                                     <div className="lif-label-col align-center">
                                         <div className="lif-icon-label">Desktop App</div>
                                     </div>
-                
-                                    <div className="lif-icon-col align-center">
-                                        <OnHoverIcon iconSrc="/graphics/legend/desktop.png"
+
+    {/* DESKTOP COL */}            
+                                    <PlatformTarget desktopImplementation={desktopImplementation}
+                                    mobileEnabledClasses='glass-card' appendedClasses="lif-icon-col align-center">
+                                        <OnHoverIcon target="lif-icon" desktopEnabledClasses='glass-card align-center'
+                                        iconSrc="/graphics/legend/desktop.png"
                                         hoverSrc='/graphics/legend/desktop_outline.png' alt="Desktop App"
                                         desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => setLegendIconHovered(['platform', 2])}
-                                        onMouseLeave={() => setLegendIconHovered([undefined, undefined])} />
-                                        <OnHoverIcon id="mobile-icon" iconSrc="/graphics/legend/mobile.png"
+                                        onMouseEnter={() => hoverOverFilter('platform', 2)}
+                                        onMouseLeave={() => hoverOverFilter(null, 0)}
+                                        override={getFilterHovered('platform', 2)}
+                                        onMouseDown={() => setAnnotationToggled('platform', 2)} />
+
+                                        <OnHoverIcon target="lif-icon" id="mobile-icon"
+                                        iconSrc="/graphics/legend/mobile.png" desktopEnabledClasses='glass-card align-center'
                                         hoverSrc='/graphics/legend/mobile_outline.png' alt="Mobile App"
                                         desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => setLegendIconHovered(['platform', 3])}
-                                        onMouseLeave={() => setLegendIconHovered([undefined, undefined])} />
-                                    </div>
+                                        onMouseEnter={() => hoverOverFilter('platform', 3)}
+                                        onMouseLeave={() => hoverOverFilter(null, 0)}
+                                        override={getFilterHovered('platform', 3)}
+                                        onMouseDown={() => setAnnotationToggled('platform', 3)} />
+                                    </PlatformTarget>
                 
                                     <div className="lif-label-col align-center">
                                         <div className="lif-icon-label">Mobile App</div>
                                     </div>
                                 </div>
                 
-                                <div id="lir-size" className="lif-icon-row align">
+                                <div id="lir-size" className="lif-icon-row align-center">
                                     <div className="lif-label-col align-center">
                                         
                                     </div>
-                
-                                    <div className="lif-icon-col align-center">
-                                        <div className="project-size-bars align-center">
-                                            <div className="psb-active"
-                                            onMouseEnter={() => setLegendIconHovered(['size', 1])}
-                                            onMouseLeave={() => setLegendIconHovered([undefined, undefined])}></div>
 
-                                            <div className="psb-active"
-                                            onMouseEnter={() => setLegendIconHovered(['size', 2])}
-                                            onMouseLeave={() => setLegendIconHovered([undefined, undefined])}></div>
+    {/* PROJECT SIZE */}            
+                                    <div id="psb-container" className="lif-icon-col align-center glass-card">
+                                        <div id="psb" className="project-size-bars align-center">
+                                            <div className="psb-col align-vertical"
+                                            onMouseEnter={() => hoverOverFilter('size', 1)}
+                                            onMouseLeave={() => hoverOverFilter(null, 0)}
+                                            onMouseDown={() => setAnnotationToggled('size', 1)}>
+                                                <PlatformTarget desktopEnabledClasses={`psb-${(((filterHovered.annotation == 'size'
+                                                && filterHovered.toggled > 0) || getAnnotationToggled('size') > 0)?
+                                                '' : 'in')}active`}
+                                                mobileEnabledClasses='psb-active' desktopImplementation={desktopImplementation}/>
+                                            </div>
 
-                                            <div className="psb-inactive"
-                                            onMouseEnter={() => setLegendIconHovered(['size', 3])}
-                                            onMouseLeave={() => setLegendIconHovered([undefined, undefined])}></div>
+                                            <div className="psb-col align-vertical"
+                                            onMouseEnter={() => hoverOverFilter('size', 2)}
+                                            onMouseLeave={() => hoverOverFilter(null, 0)}
+                                            onMouseDown={() => setAnnotationToggled('size', 2)}>
+                                                <PlatformTarget desktopEnabledClasses={`psb-${(((filterHovered.annotation == 'size'
+                                                && filterHovered.toggled > 1) || getAnnotationToggled('size') > 1)?
+                                                '' : 'in')}active`}
+                                                mobileEnabledClasses='psb-active' desktopImplementation={desktopImplementation} />
+                                            </div>
+
+                                            <div className="psb-col align-vertical"
+                                            onMouseEnter={() => hoverOverFilter('size', 3)}
+                                            onMouseLeave={() => hoverOverFilter(null, 0)}
+                                            onMouseDown={() => setAnnotationToggled('size', 3)}>
+                                                <PlatformTarget desktopEnabledClasses={`psb-${(((filterHovered.annotation == 'size'
+                                                && filterHovered.toggled > 2) || getAnnotationToggled('size') > 2)?
+                                                '' : 'in')}active`}
+                                                mobileEnabledClasses='psb-active' desktopImplementation={desktopImplementation} />
+                                            </div>
                                         </div>
 
                                         <div className="lif-icon" id="badge">
@@ -559,24 +628,20 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                                     </div>
                                 </div>
                             </div>
-                        </div> }
+                        </PlatformTarget> }
 
-                        { desktopImplementation || (!desktopImplementation && getAnnotationToggled('mobileScreen') == 1)
-                        && <div id="pl-gallery">
-                            
+                        { (desktopImplementation || (!desktopImplementation && getAnnotationToggled('mobileScreen') == 1))
+                        && <div id="pl-gallery" className="align-center">
+                            <div className="header-label">
+                                Many of my projects are being imported from my old portfolio
+                                here <span className="react-link">(View Old Portfolio on Desktop)</span>. 
+                            </div>
                         </div> }
                     </div>
-
-{/*
-                    { legendScreen && <Legend categoryFilter={categoryFilter} platformFilter={platformFilter}
-                        sizeFilter={sizeFilter} setCategoryFilter={setCategoryFilter} setDbScreen={setDbScreen}
-                        setLegendScreen={setLegendScreen}></Legend> }
-                    { !legendScreen && <Gallery categoryFilter={categoryFilter} platformFilter={platformFilter}
-                                            sizeFilter={sizeFilter}></Gallery> }
-                                            */}
                 </div> }
             </div>
 
+{/* BOTTOM NAVIGATION BAR */}
             <div id="fr-container" className="align-center">
                 <div id="filter-row" className="dark-translucent">
                     { !desktopImplementation && <div className="align-center">

@@ -1,4 +1,4 @@
-import Anim from "../../../components/Anim";
+import Anim from "../../../components/anim/Anim";
 import NestedProps from "./NestedProps";
 import React, { useState, useEffect, useRef } from 'react';
 

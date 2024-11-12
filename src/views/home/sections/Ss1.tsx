@@ -2,7 +2,7 @@ import './ss1.scss';
 import useScrollTarget from '../../../assets/scripts/use_scroll_target';
 import React, { useState, useEffect } from 'react';
 
-import Anim from '../../../components/Anim';
+import Anim from '../../../components/anim/Anim';
 
 interface Ss1Props {
     desktopImplementation: boolean;

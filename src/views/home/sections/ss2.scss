@@ -24,26 +24,8 @@
     }
             */
 
-    .header-label{
+    .header-label, .header-label-anim{
         font-size: 20px;
-    }
-
-    .project-size-bars{
-        gap: 4px;
-
-        .psb-active, .psb-inactive{
-            height: 3px;
-            width: 32px;
-            display: block;
-        }
-
-        .psb-active{
-            background-color: white;
-        }
-
-        .psb-inactive{
-            background-color: rgba(255, 255, 255, 0.5);
-        }
     }
 
     #media-outlets{

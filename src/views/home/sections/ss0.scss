@@ -26,8 +26,57 @@
                 }
             }
 
-            #clb-0{
+            #intro-button #ib-inner, .ib-background, .ib-background-anim{
+                width: 200px;
+                height: 70px;
+            }
+
+            #intro-button{
+                cursor: pointer;
+                margin-left: 8px;
                 display: inline-block;
+                border: solid #24292F 4px;
+
+                #ib-inner{
+                    gap: 8px;
+
+                    .ib-background, .ib-background-anim{
+                        display: block;
+                        transition: 0.7s linear;
+                        position: absolute;
+                        background-color: rgba(0, 0, 0, 0.3);
+                        clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+                        pointer-events: none;
+                    }
+
+                    .ib-background-anim{
+                        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+                    }
+
+                    .button-caption{
+                        font-weight: 500;
+                    }
+
+                    img{
+                        width: 58px;
+                        margin-top: 2px;
+                    }
+                }
+            }
+
+            .custom-landing-buttons{
+                display: inline-block;
+
+                .custom-landing-button{
+                    .clb-inner{
+                        .on-hover-icon{
+                            img{
+                                width: 52px;
+                                margin-top: 4px;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -107,6 +156,23 @@
                     h3{
                         font-size: 30px;
                         padding-right: 0;
+                    }
+                }
+
+                #intro-button{
+                    margin-left: 0;
+                }
+
+                .custom-landing-buttons{
+                    .custom-landing-button{
+                        .clb-inner{
+                            .on-hover-icon{
+                                img{
+                                    width: 52px;
+                                    margin-top: 4px;
+                                }
+                            }
+                        }
                     }
                 }
             }

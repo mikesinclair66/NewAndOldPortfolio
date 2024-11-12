@@ -4,7 +4,7 @@ import wait from '../../../assets/scripts/wait';
 
 import React, { useState, useRef, useEffect } from 'react';
 
-import Anim from '../../../components/Anim';
+import Anim from '../../../components/anim/Anim';
 import BlurredVideoContainer from '../../../components/blurred_video_container/BlurredVideoContainer';
 import OnHoverIcon from '../../../components/on_hover_icon/OnHoverIcon';
 import TV from '../../../components/TV';
@@ -38,9 +38,11 @@ const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFun
         wait(100, () => setSplashSectLoading(false));
 
         //highlight Get In Touch
+        /*
         let clb = document.getElementById('clb-0')?.getElementsByClassName('clb-second')[0];
         clb?.addEventListener('mouseover', () => setCustomHighlight(true));
         clb?.addEventListener('mouseout', () => setCustomHighlight(false));
+        */
 
         //specify shells to load
         let _csDisplays = [false, false, false, false, false, false];
@@ -121,6 +123,7 @@ const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFun
                         <h3>and you&#39;re about to dive into an ocean of great software design{/*s*/} and experience.</h3>
                     </div>
 
+{/*
                     <Anim id="clb-0" target="custom-landing-buttons" toggled={customHighlight}
                     onPointerDown={scrollAllTheWay}>
                         <div className="custom-landing-button clb-first">
@@ -132,7 +135,6 @@ const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFun
                             </div>
                         </div>
 
-                        {/* Gathers the same size proportion */}
                         <div className="custom-landing-button clb-second">
                             <div className="align-center clb-inner">
                                 <span className="button-caption">Get In Touch</span>
@@ -142,6 +144,19 @@ const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFun
                             </div>
                         </div>
                     </Anim>
+*/}
+
+                    <div id="intro-button" onPointerDown={scrollAllTheWay} onMouseEnter={() => setCustomHighlight(true)}
+                    onMouseLeave={() => setCustomHighlight(false)}>
+                        <div id="ib-inner" className="align-center">
+                            <Anim target="ib-background" toggled={customHighlight}></Anim>
+
+                            <div className="button-caption">Get In Touch</div>
+                            <OnHoverIcon iconSrc="/graphics/media/gmail_black.png"
+                            hoverSrc="/graphics/media/gmail.png" alt="Email Michael"
+                            desktopImplementation={desktopImplementation} override={customHighlight} />
+                        </div>
+                    </div>
                 </div>
             </div>
 

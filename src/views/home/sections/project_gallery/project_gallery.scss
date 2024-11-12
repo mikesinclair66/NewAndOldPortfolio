@@ -11,6 +11,55 @@
 
             }
 
+            .glass-card{
+                position: relative;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 15px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                overflow: hidden;
+                box-sizing: border-box;
+
+                &::before{
+                    content: "";
+                    border-radius: inherit;
+                    position: absolute;
+                    pointer-events: none;
+                    top: 2px;
+                    left: 2px;
+                    right: 2px;
+                    bottom: 2px;
+                    padding: 2px;
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 28px);
+                    
+                    pointer-events: none;
+                    z-index: -1;
+                }
+            }
+
+            .project-size-bars{
+                gap: 4px;
+                height: 100%;
+        
+                .psb-col{
+                    width: 32px;
+                    height: 100%;
+
+                    .psb-active, .psb-inactive{
+                        height: 3px;
+                        width: 100%;
+                        display: block;
+                    }
+            
+                    .psb-active{
+                        background-color: white;
+                    }
+            
+                    .psb-inactive{
+                        background-color: rgba(255, 255, 255, 0.5);
+                    }
+                }
+            }
+
             #main-interface, #main-interface #filter-col{
                 border-radius: 0 0 0 27px;
             }
@@ -240,30 +289,9 @@
                         #pl-center{
                             width: 75%;
 
-                            .header-label{
+                            .header-label, .header-label-anim{
                                 padding: 3px 11px;
-                                position: relative;
-                                background: rgba(255, 255, 255, 0.2);
-                                border-radius: 15px;
-                                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                                color: white;
-                                overflow: hidden;
-                                box-sizing: border-box;
-                                pointer-events: none;
-                            }
-
-                            .header-label::before{
-                                content: "";
-                                border-radius: inherit;
-                                position: absolute;
-                                top: 2px;
-                                left: 2px;
-                                right: 2px;
-                                bottom: 2px;
-                                padding: 2px;
-                                background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 28px);
-                                pointer-events: none;
-                                z-index: -1;
+                                border-radius: 10px;
                             }
                         }
     
@@ -300,54 +328,72 @@
                         opacity: 0;
                     }
 
-                    #pl-body #pl-legend{
-                        #pll-icon-title{
-                            display: none;
-                        }
-
-                        #pll-inner{
-                            .lif-icon-row{
-                                gap: 8px;
-                                margin-bottom: 8px;
-                                height: 58px;
+                    #pl-body{
+                        #pl-legend{
+                            #pll-icon-title{
+                                display: none;
+                            }
     
-                                &:first-child{
-                                    margin-top: 8px;
-                                }
-    
-                                &:last-child{
-                                    margin-bottom: 0;
-                                }
-    
-                                .lif-label-col, .lif-icon-col{
-                                    width: 33.333%;
-                                    height: 100%;
-                                }
-    
-                                .lif-label-col{
+                            #pll-inner{
+                                .lif-icon-row{
+                                    gap: 8px;
+                                    margin-bottom: 8px;
+                                    height: 58px;
+        
                                     &:first-child{
-                                        text-align: right;
+                                        margin-top: 8px;
+                                    }
+        
+                                    &:last-child{
+                                        margin-bottom: 0;
+                                    }
+        
+                                    .lif-label-col, .lif-icon-col{
+                                        height: 100%;
+                                    }
+        
+                                    .lif-label-col{
+                                        width: 26%;
+    
+                                        &:first-child{
+                                            text-align: right;
+                                        }
+                                    }
+        
+                                    .lif-icon-col{
+                                        gap: 8px;
+                                        width: 48%;
+        
+                                        .lif-icon{
+                                            position: relative;
+                                            top: 2px;
+                                            cursor: pointer;
+    
+                                            img{
+                                                height: 42px;
+                                            }
+                                        }
                                     }
                                 }
-    
-                                .lif-icon-col{
-                                    gap: 8px;
-    
-                                    .on-hover-icon{
-                                        cursor: pointer;
-                                        height: 54px;
-                                        position: relative;
-                                        top: 7px;
+        
+                                #lir-size{
+                                    .lif-icon-col{
+                                        #badge{
+                                            display: none;
+                                        }
                                     }
                                 }
                             }
-    
-                            #lir-size{
-                                .lif-icon-col{
-                                    #badge{
-                                        display: none;
-                                    }
-                                }
+                        }
+
+                        #pl-gallery{
+                            height: 270px;
+
+                            .header-label{
+                                width: 80%;
+                                text-align: center;
+                                font-size: 18px;
+                                transform: translateY(-50%);
                             }
                         }
                     }
@@ -394,6 +440,14 @@
     #ss-2{
         #ss-2-inner{
             #lol{
+                .glass-card::before{
+                    top: 1px;
+                    left: 1px;
+                    right: 1px;
+                    bottom: 1px;
+                    padding: 1px;
+                }
+
                 #main-interface{
                     height: 498px;
 
@@ -405,13 +459,16 @@
                         border-radius: 0 40px 40px 0;
                         width: 600px;
 
-                        #pl-header #pl-center .header-label, #pl-body #pl-legend #pll-inner{
-                            width: 500px;
+                        #pl-header #pl-center .header-label, #pl-header #pl-center .header-label-anim,
+                        #pl-body #pl-legend #pll-inner{
+                            width: 543px;
                         }
 
                         #pl-header{
                             #pl-center{
-                                .header-label{
+                                width: 100%;
+
+                                .header-label, .header-label-anim{
                                     border-radius: 15px 15px 0 0;
                                     box-shadow: none;
                                     margin-bottom: -17px;
@@ -422,68 +479,80 @@
                                         left:1px;
                                     }
                                 }
-
-                                .header-label::before{
-                                    top: 2px;
-                                    left: 2px;
-                                    right: 2px;
-                                    bottom: 2px;
-                                    padding: 2px;
-                                }
                             }
                         }
 
-                        #pl-body #pl-legend{
-                            #pll-icon-title{
-                                display: block;
-                            }
-
-                            #pll-inner{
-                                padding: 3px 0;
-                                height: 68px;
-                                border-radius: 0 0 15px 15px;
-
-                                .lif-icon-row{
-                                    width: 104px;
-                                    height: 100%;
-
-                                    .lif-label-col{
-                                        display: none;
-                                    }
-
-                                    .lif-icon-col{
-                                        width: 100%;
+                        #pl-body{
+                            #pl-legend{
+                                #pll-icon-title{
+                                    display: block;
+                                }
+    
+                                #pll-inner{
+                                    padding: 3px 0;
+                                    height: 68px;
+                                    border-radius: 0 0 15px 15px;
+    
+                                    .lif-icon-row{
                                         height: 100%;
-
-                                        .on-hover-icon{
-                                            transition: 0.2s;
-                                            top: -4px;
-                                            height: 32px;
-
-                                            &:hover, &:active{
-
+    
+                                        .lif-label-col{
+                                            display: none;
+                                        }
+    
+                                        .lif-icon-col{
+                                            gap: 0;
+                                            width: 100%;
+                                            height: 100%;
+    
+                                            .lif-icon{
+                                                margin-right: 8px;
+                                                transition: 0.2s;
+                                                top: 0;
+                                                width: 56px;
+                                                height: 56px;
+                                                z-index: 1;
+    
+                                                img{
+                                                    margin-top: 4px;
+                                                    height: 34px;
+                                                }
                                             }
                                         }
-
-                                        #mobile-icon{
-                                            margin-top: -6px;
+    
+                                        #psb-container{
+                                            height: 56px;
+                                        }
+    
+                                        &:first-child, &:last-child{
+                                            position: static;
+                                        }
+                                        position: relative;
+                                        top: 4px;
+                                    }
+    
+                                    #lif-squished-row{
+                                        width: 129px;
+                                    }
+    
+                                    #lir-size{
+                                        #psb-container{
+                                            padding: 0 20px;
+    
+                                            #psb .psb-col{
+                                                cursor: pointer;
+                                            }
+                                        }
+    
+                                        .lif-icon-col .lif-icon{
+                                            margin-right: 0;
                                         }
                                     }
-
-                                    &:first-child, &:last-child{
-                                        position: static;
-                                    }
-                                    position: relative;
-                                    top: 4px;
                                 }
+                            }
 
-                                #lif-squished-row{
-                                    width: 114px;
-                                }
-
-                                #lir-size{
-                                    margin-left: 12px;
-                                }
+                            #pl-gallery{
+                                height: 374px;
                             }
                         }
                     }
@@ -499,7 +568,7 @@
             #lol{
                 #main-interface{
                     #projects-list{
-                        width: 680px;
+                        //width: 680px;
                     }
                 }
             }

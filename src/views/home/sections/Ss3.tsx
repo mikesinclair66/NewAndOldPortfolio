@@ -3,8 +3,6 @@ import fetch_api from 'src/assets/scripts/fetch_api';
 import scroll_to_bottom from 'src/assets/scripts/scroll_to_bottom';
 
 import React, { useState, useEffect } from 'react';
-import Anim from '../../../components/Anim';
-import OnHoverIcon from '../../../components/on_hover_icon/OnHoverIcon';
 
 interface Ss3Props {
     desktopImplementation: boolean;

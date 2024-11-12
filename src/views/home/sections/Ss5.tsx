@@ -130,8 +130,43 @@ const Ss5: React.FC<Ss5Props> = ({ desktopImplementation }) => {
         }
     }, [contactStage, codeInputSelect]);
 
+//FIREWORKS
+    const ss5Ref = useRef<HTMLDivElement | null>(null);
+    const ss5Canvas = useRef<HTMLCanvasElement | null>(null);
+
+/*
+    const [fireworkStage, setFireworkStage] = useState<boolean>(false);
+    const canvasCtx = useRef<any | null>(null);
+
+    useEffect(() => {
+        let ss4 = document.getElementById('ss-4');
+        const checkFireworkStage = () => {
+            if(ss4?.scrollTop){
+                if(!fireworkStage && window.scrollY > ss4.scrollTop)
+                    setFireworkStage(true);
+                else if(fireworkStage && window.scrollY < ss4.scrollTop)
+                    setFireworkStage(false);
+            }
+        }
+
+        if(ss5Canvas.current)
+            canvasCtx.current = ss5Canvas.current.getContext('2d');
+
+        window.addEventListener('scroll', checkFireworkStage);
+        return () => window.removeEventListener('scroll', checkFireworkStage);
+    }, []);
+
+    useEffect(() => {
+        if(fireworkStage){
+            
+        }
+    }, [fireworkStage]);
+    */
+
     return (
-        <div id="ss-5">
+        <div id="ss-5" ref={ss5Ref}>
+            <canvas id="birthday" ref={ss5Canvas}></canvas>
+
             <div id="ss-5-highlight" className="fill align-center">
                 <div id="ss-5-inner" className='align-center'>
                     <div id="ss-5-content">

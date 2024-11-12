@@ -1,16 +1,25 @@
-#ss-5{
+#ss-5, #ss-5 #birthday{
     height: 720px;
-    background-image: url('../../../../public/graphics/mountain.jpg');
+}
+
+#ss-5{
+    background-image: url('../../../../public/graphics/mountain_small.jpeg');
     background-size: cover;
     background-position: 50% 80%;
 
-    #ss-5-highlight{
-        background-image: linear-gradient(90deg, rgba(223, 61, 136, 0.7), #b54ca4);
+    #birthday{
+        position: absolute;
+        width: 100%;
+        z-index: 2;
+        pointer-events: none;
+    }
 
+    #ss-5-highlight{
         #ss-5-inner{
             background-color: white;
             border-radius: 8px;
-            padding: 16px 40px;
+            padding: 5px 20px;
+            //padding: 16px 40px;
             height: 340px;
 
             #ss-5-content{
@@ -128,14 +137,36 @@
     }
 }
 
-@media only screen and (min-width: 750px) and (min-height: 500px){
+@media only screen and (min-width: 380px) and (min-height: 700px){
     #ss-5{
+        #ss-5-highlight{
+            #ss-5-inner{
+                padding: 10px 30px;
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 500px) and (min-height: 700px){
+    #ss-5{
+        #ss-5-highlight{
+            #ss-5-inner{
+                padding: 16px 40px;
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 750px) and (min-height: 500px){
+    #ss-5, #ss-5 #birthday{
+        height: 420px;
+    }
+
+    #ss-5{
+        background-image: url('../../../../public/graphics/mountain.jpeg');
         height: 420px;
 
         #ss-5-highlight{
-            background-image: linear-gradient(90deg, rgba(223, 61, 136, 0.7), rgba(227, 77, 116, 0.55),
-                rgba(181, 76, 164, 0.85));
-
             #ss-5-inner{
                 height: 275px;
 
