@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import debug_dict from 'src/assets/scripts/debug_dict';
+//import debug_dict from 'src/assets/scripts/debug_dict';
 
 function usePlatformClasses(desktopImplementation: boolean, appendedClasses?: string,
 mobileEnabledClasses?: string, desktopEnabledClasses?: string){

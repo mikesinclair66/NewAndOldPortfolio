@@ -1,180 +1,36 @@
 import './project_gallery.scss';
 import { useNavigate } from 'react-router-dom';
+import { useDateFilterLogic } from './hooks/useDateFilterLogic';
+import { useGoToVue } from './hooks/useGoToVue';
+import { useProjectFilters } from './hooks/useProjectFilters';
+import { useFilterDataSearch } from './hooks/useFilterDataSearch';
+import { useFilterColumnLabels } from './hooks/useFilterColumnLabels';
+import { useLegendBadges } from './hooks/useLegendBadges';
+import { useGalleryCards } from './hooks/useGalleryCards';
 
-import Anim from 'src/components/anim/Anim';
+import Anim from '../../../../components/anim/Anim';
 import React, { useState, useEffect, useRef } from 'react';
-import PlatformAnim from 'src/components/anim/PlatformAnim';
-import PlatformTarget from 'src/components/target/PlatformTarget';
-import OnHoverIcon from 'src/components/on_hover_icon/OnHoverIcon';
-import debug_dict from 'src/assets/scripts/debug_dict';
+import PlatformAnim from '../../../../components/anim/PlatformAnim';
+import PlatformTarget from '../../../../components/target/PlatformTarget';
 
 interface PGProps {
     desktopImplementation: boolean;
 }
 
 const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
-    const navigate = useNavigate();
-    const gotoProject = (route: string) => {
-        navigate(route);
-        window.location.reload();
-    }
-
-    useEffect(() => {
-        window.history.pushState({}, '', '/');
-
-        const handlePopState = () => {
-            navigate('/');
-        };
-
-        window.addEventListener('popstate', handlePopState);
-        return () => {
-            window.removeEventListener('popstate', handlePopState);
-        };
-    }, [navigate]);
-
-    // Filters
-
-    class Filter {
-        annotations: string[];
-        toggled: number = 0;
-
-        constructor(annotations: string[]){
-            this.annotations = annotations;
-        }
-
-        getData(){
-            return {
-                annotations: this.annotations,
-                toggled: this.toggled
-            }
-        }
-    }
-
-    interface FilterData {
-        annotations: string[];
-        toggled: number;
-    }
-
-    const [filters, setFilters] = useState<{ [key: string]: FilterData }>({
-        subject: new Filter([ 'All', 'Software Engineer', 'Software Developer', 'Game Developer' ]).getData(),
-        platform: new Filter([ 'All', 'Web', 'Desktop', 'Mobile' ]).getData(),
-        purpose: new Filter([ 'All', 'Education', 'Contracted', 'Productivity' ]).getData(),
-        size: new Filter([ 'All', 'Small', 'Medium', 'Large' ]).getData(),
-        mobileScreen: new Filter([ 'Filters', 'Gallery', 'Legend' ]).getData()
-    });
-
-    const getAnnotationAtIndex = (filter: string, annotation: number = -1) => {
-        let _annotation: number;
-        if(annotation == -1)
-            _annotation = filters[filter].toggled;
-        else
-            _annotation = annotation;
-
-        if(_annotation == -1)
-            return undefined;
-        else
-            return filters[filter].annotations[_annotation];
-    }
-
-    const getAnnotationToggled = (filter: string) => {
-        return filters[filter].toggled;
-    }
-
-    const setAnnotationToggled = (filter: string, annotation: number) => {
-        setFilters(prevFilters => ({
-            ...prevFilters,
-            [filter]: {
-                ...prevFilters[filter],
-                toggled: annotation
-            }
-        }));
-    }
-
-    // FilterColsExtended
-
-    const [filterColsExtended, setFilterColsExtended] = useState<{ [key: string]: boolean }>({
-        subject: true,
-        platform: true,
-        purpose: true,
-        size: true,
-        date: true
-    });
-
-    const flipFilterColsExtended = (filter: string) => {
-        setFilterColsExtended(prevFilters => ({
-            ...prevFilters,
-            [filter]: !filterColsExtended[filter]
-        }));
-    }
-
-// Date range
-
-    const FINAL_SCROLL_LEVEL = 11;
-    const [scrollLevel, setScrollLevel] = useState<number>(FINAL_SCROLL_LEVEL);
-    const sliderRef = useRef<HTMLDivElement  | null>(null);
-
-    useEffect(() => {
-        setAnnotationToggled('mobileScreen', desktopImplementation ? -1 : 0);
-
-// Filter date range
-        const handleSliderDrag = (ev: PointerEvent) => {
-            if(sliderRef.current){
-                const sliderRect = sliderRef.current.getBoundingClientRect();
-                let sliderValue = Math.floor(11 * ((ev.clientX - sliderRect.left) / sliderRect.width));
-
-                if(sliderValue >= 0 && sliderValue <= 11)
-                    setScrollLevel(sliderValue);
-            }
-        }
-    
-        const handleSliderReleased = () => {
-            window.removeEventListener('pointermove', handleSliderDrag);
-            window.removeEventListener('pointerup', handleSliderReleased);
-        }
-
-        const loadPointerDown = () => {
-            window.addEventListener('pointermove', handleSliderDrag);
-            window.addEventListener('pointerup', handleSliderReleased);
-        }
-
-        if(sliderRef.current)
-            sliderRef.current.addEventListener('pointerdown', loadPointerDown);
-
-        return () => {
-            if(sliderRef.current)
-                sliderRef.current.removeEventListener('pointerdown', loadPointerDown);
-        }
-    }, [desktopImplementation]);
-
-//Legend filters hovered
-
-    const [filterHovered, setFilterHovered] = useState<any>({
-        annotation: null,
-        toggled: 0
-    });
-
-    const hoverOverFilter = (annotation: string | null, toggled: number) => {
-        setFilterHovered({
-            annotation: annotation,
-            toggled: toggled
-        });
-    }
-
-    const getFilterHovered = (annotation: string | null, toggled: number) => {
-        return (annotation == null && filterHovered.annotation == null)
-            || (annotation == filterHovered.annotation && toggled == filterHovered.toggled);
-    }
-
-    //Project Gallery - plHeader
-
-    const [plHeader, setPlHeader] = useState<string>('0');
-
-    useEffect(() => {
-        if(desktopImplementation)
-            setPlHeader('2');
-        else 
-            setPlHeader(getAnnotationToggled('mobileScreen') == 1 ? '0' : '1');
-    }, [desktopImplementation, filters]);
+    const { goToVueProject } = useGoToVue();
+    const { filters, getAnnotationAtIndex, getAnnotationToggled, setAnnotationToggled } = useProjectFilters();
+    const { filterColsExtended, flipFilterColsExtended, detectFilterColFlipByMouse, plHeader } = useFilterDataSearch(
+        getAnnotationToggled, filters, desktopImplementation);
+    const { dateFch, dateFcc, completionFch, completionFcc, platformFch, platformFcc,
+    purposeFch, purposeFcc, sizeFch, sizeFcc, typeFch, typeFcc, FchInner } = useFilterColumnLabels(
+    getAnnotationToggled, getAnnotationAtIndex, filterColsExtended);
+    const { FINAL_SCROLL_LEVEL, scrollLevel, setScrollLevel, sliderRef, dateRangeMin, dateRangeMax }
+    = useDateFilterLogic(setAnnotationToggled, desktopImplementation);
+    const { badgeHovered, hoverOverFilter, getFilterHovered, legendGear, legendJava, legendController,
+    legendWeb, legendDesktop, legendMobile, legendS1, legendS2, legendS3 } = useLegendBadges(getAnnotationToggled,
+        desktopImplementation);
+    const { galleryCards } = useGalleryCards();
 
     return (
         <div id="lol">
@@ -187,31 +43,45 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
 
 {/* FILTERCOL - DATE */}
                     <div id="date" className="fc-section">
-                        <div className='fc-header dark-translucent align-center'>
+                        <Anim target='fc-header' appendedClasses='dark-translucent align-center'
+                        toggled={!filterColsExtended['date']}>
                             <div className="fch-inner align-horizontal">
                                 <div className="fch">
-                                    <div className="header-label cursor-highlight"
-                                    onPointerDown={() => flipFilterColsExtended('date')}>Date Published</div>
+                                    { !desktopImplementation && React.cloneElement(dateFch, {
+                                        onTouchEnd: () => flipFilterColsExtended('date')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(dateFch, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'date')
+                                    }) }
                                 </div>
                                 <div className="fc-collapse align-vertical align-right">
-                                    <Anim target="fcc" appendedClasses='align-center' untoggledClasses='theme-border'
-                                    toggled={filterColsExtended['date']} onPointerDown={() => flipFilterColsExtended('date')}>
-                                        <span className="collapse-icon">
-                                            &#94;
-                                        </span>
-                                    </Anim>
+                                    { !desktopImplementation && React.cloneElement(dateFcc, {
+                                        onTouchEnd: () => flipFilterColsExtended('date')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(dateFcc, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'date')
+                                    }) }
                                 </div>
                             </div>
-                        </div>
+                        </Anim>
 
                         <Anim target="publish-range" toggled={filterColsExtended['date']}>
                             <div id="range-labels" className="align-center">
-                                <div className="cursor-highlight" onPointerDown={() => setScrollLevel(0)}>
-                                    &#60; 2014
-                                </div>
-                                <div className='cursor-highlight' onPointerDown={() => setScrollLevel(FINAL_SCROLL_LEVEL)}>
-                                    {(2013 + scrollLevel == 2013 ? '< 2014' : 2013 + scrollLevel)}
-                                </div>
+                                { !desktopImplementation && React.cloneElement(dateRangeMin, {
+                                    onTouchEnd: () => setScrollLevel(0)
+                                }) }
+                                { desktopImplementation && React.cloneElement(dateRangeMin, {
+                                    onClick: () => setScrollLevel(0)
+                                }) }
+
+                                { !desktopImplementation && React.cloneElement(dateRangeMax, {
+                                    onTouchEnd: () => setScrollLevel(FINAL_SCROLL_LEVEL)
+                                }) }
+                                { desktopImplementation && React.cloneElement(dateRangeMax, {
+                                    onClick: () => setScrollLevel(FINAL_SCROLL_LEVEL)
+                                }) }
                             </div>
 
                             <div id="range">
@@ -223,224 +93,281 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                         </Anim>
                     </div>
 
-{/* FILTERCOL - PLATFORM */}
-                    <div id="platform" className="fc-section">
-                        <div className="fc-header dark-translucent align-center">
+{/* FILTERCOL - COMPLETION  */}
+                    <div id="completion" className="fc-section">
+                        <Anim target="fc-header" appendedClasses="dark-translucent align-center"
+                        toggled={!filterColsExtended['completion']}>
                             <div className="fch-inner align-horizontal">
                                 <div className="fch">
-                                    <div className="header-label cursor-highlight"
-                                    onPointerDown={() => flipFilterColsExtended('platform')}>Platform</div>
+                                    { !desktopImplementation && React.cloneElement(completionFch, {
+                                        onTouchEnd: () => flipFilterColsExtended('completion')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(completionFch, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'completion')
+                                    }) }
                                 </div>
                                 <div className="fc-collapse align-vertical align-right">
-                                    <Anim target="fcc" appendedClasses='align-center' untoggledClasses='theme-border'
-                                    toggled={filterColsExtended['platform']}
-                                    onPointerDown={() => flipFilterColsExtended('platform')}>
-                                        <span className="collapse-icon">
-                                            &#94;
-                                        </span>
-                                    </Anim>
+                                    { !desktopImplementation && React.cloneElement(completionFcc, {
+                                        onTouchEnd: () => flipFilterColsExtended('completion')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(completionFcc, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'completion')
+                                    }) }
                                 </div>
                             </div>
-                        </div>
+                        </Anim>
+
+                        <Anim target='fc-radio-list' toggled={filterColsExtended['completion']}>
+                            { !desktopImplementation && React.cloneElement(<FchInner option={0} annotation="completion" />, {
+                                onTouchEnd: () => setAnnotationToggled('completion', 0)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={0} annotation="completion" />, {
+                                onClick: () => setAnnotationToggled('completion', 0)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={1} annotation="completion" />, {
+                                onTouchEnd: () => setAnnotationToggled('completion', 1)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={1} annotation="completion" />, {
+                                onClick: () => setAnnotationToggled('completion', 1)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={2} annotation="completion" />, {
+                                onTouchEnd: () => setAnnotationToggled('completion', 2)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={2} annotation="completion" />, {
+                                onClick: () => setAnnotationToggled('completion', 2)
+                            }) }
+                        </Anim>
+                    </div>
+
+{/* FILTERCOL - PLATFORM */}
+                    <div id="platform" className="fc-section">
+                        <Anim target="fc-header" appendedClasses="dark-translucent align-center"
+                        toggled={!filterColsExtended['platform']}>
+                            <div className="fch-inner align-horizontal">
+                                <div className="fch">
+                                    { !desktopImplementation && React.cloneElement(platformFch, {
+                                        onTouchEnd: () => flipFilterColsExtended('platform')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(platformFch, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'platform')
+                                    }) }
+                                </div>
+                                <div className="fc-collapse align-vertical align-right">
+                                    { !desktopImplementation && React.cloneElement(platformFcc, {
+                                        onTouchEnd: () => flipFilterColsExtended('platform')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(platformFcc, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'platform')
+                                    }) }
+                                </div>
+                            </div>
+                        </Anim>
 
                         <Anim target='fc-radio-list' toggled={filterColsExtended['platform']}>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('platform', 0)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('platform') == 0 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">All</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('platform', 1)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('platform') == 1 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Web</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('platform', 2)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('platform') == 2 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Desktop</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('platform', 3)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('platform') == 3 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Mobile</div>
-                                </div>
-                            </div>
+                            { !desktopImplementation && React.cloneElement(<FchInner option={0} annotation="platform" />, {
+                                onTouchEnd: () => setAnnotationToggled('platform', 0)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={0} annotation="platform" />, {
+                                onClick: () => setAnnotationToggled('platform', 0)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={1} annotation="platform" />, {
+                                onTouchEnd: () => setAnnotationToggled('platform', 1)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={1} annotation="platform" />, {
+                                onClick: () => setAnnotationToggled('platform', 1)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={2} annotation="platform" />, {
+                                onTouchEnd: () => setAnnotationToggled('platform', 2)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={2} annotation="platform" />, {
+                                onClick: () => setAnnotationToggled('platform', 2)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={3} annotation="platform" />, {
+                                onTouchEnd: () => setAnnotationToggled('platform', 3)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={3} annotation="platform" />, {
+                                onClick: () => setAnnotationToggled('platform', 3)
+                            }) }
                         </Anim>
                     </div>
 
 {/* FILTERCOL - PURPOSE */}
                     <div id="purpose" className="fc-section">
-                        <div className="fc-header dark-translucent align-center">
+                        <Anim target="fc-header" appendedClasses="dark-translucent align-center"
+                        toggled={!filterColsExtended['purpose']}>
                             <div className="fch-inner align-horizontal">
                                 <div className="fch">
-                                    <div className="header-label cursor-highlight"
-                                    onPointerDown={() => flipFilterColsExtended('purpose')}>Purpose</div>
+                                    { !desktopImplementation && React.cloneElement(purposeFch, {
+                                        onTouchEnd: () => flipFilterColsExtended('purpose')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(purposeFch, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'purpose')
+                                    }) }
                                 </div>
                                 <div className="fc-collapse align-vertical align-right">
-                                    <Anim target="fcc" appendedClasses='align-center' untoggledClasses='theme-border'
-                                    toggled={filterColsExtended['purpose']} onPointerDown={() => flipFilterColsExtended('purpose')}>
-                                        <span className="collapse-icon">
-                                            &#94;
-                                        </span>
-                                    </Anim>
+                                    { !desktopImplementation && React.cloneElement(purposeFcc, {
+                                        onTouchEnd: () => flipFilterColsExtended('purpose')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(purposeFcc, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'purpose')
+                                    }) }
                                 </div>
                             </div>
-                        </div>
+                        </Anim>
 
                         <Anim target="fc-radio-list" toggled={ filterColsExtended['purpose'] }>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('purpose', 0)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('purpose') == 0 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">All</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('purpose', 1)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('purpose') == 1 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Education</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('purpose', 2)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('purpose') == 2 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Paid</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('purpose', 3)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('purpose') == 3 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Tools/Frameworks</div>
-                                </div>
-                            </div>
+                            { !desktopImplementation && React.cloneElement(<FchInner option={0} annotation="purpose" />, {
+                                onTouchEnd: () => setAnnotationToggled('purpose', 0)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={0} annotation="purpose" />, {
+                                onClick: () => setAnnotationToggled('purpose', 0)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={1} annotation="purpose" />, {
+                                onTouchEnd: () => setAnnotationToggled('purpose', 1)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={1} annotation="purpose" />, {
+                                onClick: () => setAnnotationToggled('purpose', 1)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={2} annotation="purpose" />, {
+                                onTouchEnd: () => setAnnotationToggled('purpose', 2)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={2} annotation="purpose" />, {
+                                onClick: () => setAnnotationToggled('purpose', 2)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={3} annotation="purpose" />, {
+                                onTouchEnd: () => setAnnotationToggled('purpose', 3)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={3} annotation="purpose" />, {
+                                onClick: () => setAnnotationToggled('purpose', 3)
+                            }) }
                         </Anim>
                     </div>
 
 {/* FILTERCOL - SIZE */}
                     <div id="size" className="fc-section">
-                        <div className="fc-header dark-translucent align-center">
+                        <Anim target="fc-header" appendedClasses="dark-translucent align-center"
+                        toggled={!filterColsExtended['size']}>
                             <div className="fch-inner align-horizontal">
                                 <div className="fch">
-                                    <div className="header-label cursor-highlight"
-                                    onPointerDown={() => flipFilterColsExtended('size')}>Size</div>
+                                    { !desktopImplementation && React.cloneElement(sizeFch, {
+                                        onTouchEnd: () => flipFilterColsExtended('size')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(sizeFch, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'size')
+                                    }) }
                                 </div>
                                 <div className="fc-collapse align-vertical align-right">
-                                    <Anim target="fcc" appendedClasses='align-center' untoggledClasses='theme-border'
-                                    toggled={filterColsExtended['size']} onPointerDown={() => flipFilterColsExtended('size')}>
-                                        <span className="collapse-icon">
-                                            &#94;
-                                        </span>
-                                    </Anim>
-                                </div>
-                            </div>
-                        </div>
-
-                        <Anim target="fc-radio-list" toggled={ filterColsExtended['size'] }>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('size', 0)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('size') == 0 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">All</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('size', 1)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('size') == 1 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Small</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('size', 2)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('size') == 2 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Medium</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('size', 3)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('size') == 3 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Large</div>
+                                    { !desktopImplementation && React.cloneElement(sizeFcc, {
+                                        onTouchEnd: () => flipFilterColsExtended('size')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(sizeFcc, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'size')
+                                    }) }
                                 </div>
                             </div>
                         </Anim>
+
+                        <Anim target="fc-radio-list" toggled={ filterColsExtended['size'] }>
+                            { !desktopImplementation && React.cloneElement(<FchInner option={0} annotation="size" />, {
+                                onTouchEnd: () => setAnnotationToggled('size', 0)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={0} annotation="size" />, {
+                                onClick: () => setAnnotationToggled('size', 0)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={1} annotation="size" />, {
+                                onTouchEnd: () => setAnnotationToggled('size', 1)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={1} annotation="size" />, {
+                                onClick: () => setAnnotationToggled('size', 1)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={2} annotation="size" />, {
+                                onTouchEnd: () => setAnnotationToggled('size', 2)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={2} annotation="size" />, {
+                                onClick: () => setAnnotationToggled('size', 2)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={3} annotation="size" />, {
+                                onTouchEnd: () => setAnnotationToggled('size', 3)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={3} annotation="size" />, {
+                                onClick: () => setAnnotationToggled('size', 3)
+                            }) }
+                        </Anim>
                     </div>
 
-{/* FILTERCOL - TYPE */}
+{/* FILTERCOL - SUBJECT */}
                     <div id="type" className="fc-section">
-                        <div className="fc-header dark-translucent align-center">
+                        <Anim target="fc-header" appendedClasses="dark-translucent align-center"
+                        toggled={!filterColsExtended['subject']}>
                             <div className="fch-inner align-horizontal">
                                 <div className="fch">
-                                    <div className="header-label cursor-highlight"
-                                    onPointerDown={() => flipFilterColsExtended('subject')}>Subject</div>
+                                    { !desktopImplementation && React.cloneElement(typeFch, {
+                                        onTouchEnd: () => flipFilterColsExtended('subject')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(typeFch, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'subject')
+                                    }) }
                                 </div>
                                 <div className="fc-collapse align-vertical align-right">
-                                    <Anim target="fcc" appendedClasses='align-center' untoggledClasses='theme-border'
-                                    toggled={filterColsExtended['subject']} onPointerDown={() => flipFilterColsExtended('subject')}>
-                                        <span className="collapse-icon">
-                                            &#94;
-                                        </span>
-                                    </Anim>
+                                    { !desktopImplementation && React.cloneElement(typeFcc, {
+                                        onTouchEnd: () => flipFilterColsExtended('subject')
+                                    }) }
+                                    { desktopImplementation && React.cloneElement(typeFcc, {
+                                        onClick: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                                            detectFilterColFlipByMouse(ev, 'subject')
+                                    }) }
                                 </div>
                             </div>
-                        </div>
+                        </Anim>
 
                         <Anim target="fc-radio-list" toggled={filterColsExtended['subject']}>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('subject', 0)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('subject') == 0 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">All</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('subject', 1)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('subject') == 1 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Software Engineer</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('subject', 2)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('subject') == 2 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Software Developer</div>
-                                </div>
-                            </div>
-                            <div className="align-left fc-section-option" onPointerDown={() => setAnnotationToggled('subject', 3)}>
-                                <div className="fcso-inner align-center">
-                                    <div className="fcso-radio theme-border">
-                                        { getAnnotationToggled('subject') == 3 && <div className="fcsor-selected"></div> }
-                                    </div>
-                                    <div className="radio-label cursor-highlight">Game Developer</div>
-                                </div>
-                            </div>
+                            { !desktopImplementation && React.cloneElement(<FchInner option={0} annotation="subject" />, {
+                                onTouchEnd: () => setAnnotationToggled('subject', 0)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={0} annotation="subject" />, {
+                                onClick: () => setAnnotationToggled('subject', 0)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={1} annotation="subject" />, {
+                                onTouchEnd: () => setAnnotationToggled('subject', 1)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={1} annotation="subject" />, {
+                                onClick: () => setAnnotationToggled('subject', 1)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={2} annotation="subject" />, {
+                                onTouchEnd: () => setAnnotationToggled('subject', 2)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={2} annotation="subject" />, {
+                                onClick: () => setAnnotationToggled('subject', 2)
+                            }) }
+
+                            { !desktopImplementation && React.cloneElement(<FchInner option={3} annotation="subject" />, {
+                                onTouchEnd: () => setAnnotationToggled('subject', 3)
+                            }) }
+                            { desktopImplementation && React.cloneElement(<FchInner option={3} annotation="subject" />, {
+                                onClick: () => setAnnotationToggled('subject', 3)
+                            }) }
                         </Anim>
                     </div>
                 </div> }
@@ -456,13 +383,13 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                             </div>
                         </div>
                         <div id="pl-center" className="pls align-center">
-                            <PlatformAnim toggled={desktopImplementation && filterHovered.annotation != null}
+                            <PlatformAnim toggled={desktopImplementation && badgeHovered.annotation != null}
                             desktopEnabledClasses="glass-card" mobileEnabledClasses="theme-border"
                             desktopImplementation={desktopImplementation} target="header-label">
                                 <div id="hl-inner">
                                     { getAnnotationAtIndex('mobileScreen', !desktopImplementation ? -1 : 2)?.toUpperCase() }
-                                    { filterHovered.annotation != null
-                                    && ` - ${filters[filterHovered.annotation].annotations[filterHovered.toggled]}` }
+                                    { badgeHovered.annotation != null
+                                    && ` - ${filters[badgeHovered.annotation].annotations[badgeHovered.toggled]}` }
                                 </div>
                             </PlatformAnim>
                         </div>
@@ -475,107 +402,114 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                     <div id="pl-body">
 {/* LEGEND */}
                         { ((!desktopImplementation && getAnnotationToggled('mobileScreen') == 2) || desktopImplementation)
-                        && <PlatformTarget id="pl-legend" desktopEnabledClasses='align-center'
+                        && <PlatformTarget id="pl-legend" appendedClasses='align-center'
                         desktopImplementation={desktopImplementation}>
-                            {/*
-                            <div id="pll-icon-title">
-
-                            </div>
-                            */}
-
                             <div id="pll-inner" className={desktopImplementation? 'align-center dark-translucent' : undefined}>
                                 <div className="lif-icon-row align">
                                     <div className="lif-label-col align-center">
-                                        <div className="lif-icon-label">Software Engineer</div>
+                                        <div className="llc">
+                                            <span className="llc-line">Software</span>
+                                            <span className="llc-line">Engineer</span>
+                                        </div>
                                     </div>
                 
     {/* GEAR COL */}
                                     <PlatformTarget desktopImplementation={desktopImplementation}
                                     mobileEnabledClasses='glass-card' appendedClasses="lif-icon-col align-center">
-                                        <OnHoverIcon target="lif-icon" desktopEnabledClasses='glass-card align-center'
-                                        iconSrc="/graphics/legend/gear.png" hoverSrc='/graphics/legend/gear_outline.png'
-                                        alt="Software Engineer" desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => hoverOverFilter('subject', 1)} id="gear-icon"
-                                        onMouseLeave={() => hoverOverFilter(null, 0)}
-                                        override={getFilterHovered('subject', 1)}
-                                        onMouseDown={() => setAnnotationToggled('subject', 1)} />
+                                        { !desktopImplementation && legendGear }
+                                        { desktopImplementation && React.cloneElement(legendGear, {
+                                            onMouseEnter: () => hoverOverFilter('subject', 1),
+                                            onMouseLeave: () => hoverOverFilter(null, 0),
+                                            override: getFilterHovered('subject', 1),
+                                            onMouseDown: () => setAnnotationToggled('subject', 1)
+                                        }) }
 
-                                        <OnHoverIcon target="lif-icon" iconSrc="/graphics/legend/java.png"
-                                        hoverSrc='/graphics/legend/java_outline.png' alt="Software Developer"
-                                        desktopImplementation={desktopImplementation}
-                                        desktopEnabledClasses='glass-card align-center'
-                                        onMouseEnter={() => hoverOverFilter('subject', 2)}
-                                        onMouseLeave={() => hoverOverFilter(null, 0)}
-                                        override={getFilterHovered('subject', 2)}
-                                        onMouseDown={() => setAnnotationToggled('subject', 2)} />
+                                        { !desktopImplementation && legendJava }
+                                        { desktopImplementation && React.cloneElement(legendJava, {
+                                            onMouseEnter: () => hoverOverFilter('subject', 2),
+                                            onMouseLeave: () => hoverOverFilter(null, 0),
+                                            override: getFilterHovered('subject', 2),
+                                            onMouseDown: () => setAnnotationToggled('subject', 2)
+                                        }) }
                                     </PlatformTarget>
                 
                                     <div className="lif-label-col align-center">
-                                        <div className="lif-icon-label">Software Developer</div>
+                                        <div className="llc">
+                                            <span className="llc-line">Software</span>
+                                            <span className="llc-line">Developer</span>
+                                        </div>
                                     </div>
                                 </div>
                 
                                 <div className="lif-icon-row align">
                                     <div className="lif-label-col align-center">
-                                        <div className="lif-icon-label">Game Developer</div>
+                                        <div className="llc">
+                                            <span className="llc-line">Game</span>
+                                            <span className="llc-line">Developer</span>
+                                        </div>
                                     </div>
 
     {/* GAME COL */}            
                                     <PlatformTarget id="squished-icon-row" desktopImplementation={desktopImplementation}
                                     mobileEnabledClasses='glass-card' appendedClasses="lif-icon-col align-center">
-                                        <OnHoverIcon target="lif-icon" desktopEnabledClasses='glass-card align-center'
-                                        iconSrc="/graphics/legend/game_controller.png"
-                                        hoverSrc='/graphics/legend/game_controller_outline.png' alt="Game Developer"
-                                        desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => hoverOverFilter('subject', 3)}
-                                        onMouseLeave={() => hoverOverFilter(null, 0)}
-                                        override={getFilterHovered('subject', 3)}
-                                        onMouseDown={() => setAnnotationToggled('subject', 3)} />
+                                        { !desktopImplementation && legendController }
+                                        { desktopImplementation && React.cloneElement(legendController, {
+                                            onMouseEnter: () => hoverOverFilter('subject', 3),
+                                            onMouseLeave: () => hoverOverFilter(null, 0),
+                                            override: getFilterHovered('subject', 3),
+                                            onMouseDown: () => setAnnotationToggled('subject', 3)
+                                        }) }
 
-                                        <OnHoverIcon target="lif-icon" iconSrc="/graphics/legend/web.png"
-                                        hoverSrc='/graphics/legend/web_outline.png' alt="Web Developer"
-                                        desktopImplementation={desktopImplementation}
-                                        desktopEnabledClasses='glass-card align-center'
-                                        onMouseEnter={() => hoverOverFilter('platform', 1)}
-                                        onMouseLeave={() => hoverOverFilter(null, 0)}
-                                        override={getFilterHovered('platform', 1)}
-                                        onMouseDown={() => setAnnotationToggled('platform', 1)} />
+                                        { !desktopImplementation && legendWeb }
+                                        { desktopImplementation && React.cloneElement(legendWeb, {
+                                            onMouseEnter: () => hoverOverFilter('platform', 1),
+                                            onMouseLeave: () => hoverOverFilter(null, 0),
+                                            override: getFilterHovered('platform', 1),
+                                            onMouseDown: () => setAnnotationToggled('platform', 1)
+                                        }) }
                                     </PlatformTarget>
                 
                                     <div className="lif-label-col align-center">
-                                        <div className="lif-icon-label">Web Project</div>
+                                        <div className="llc">
+                                            <span className="llc-line">Web</span>
+                                            <span className="llc-line">App</span>
+                                        </div>
                                     </div>
                                 </div>
                 
                                 <div className="lif-icon-row align">
                                     <div className="lif-label-col align-center">
-                                        <div className="lif-icon-label">Desktop App</div>
+                                        <div className="llc">
+                                            <span className="llc-line">Desktop</span>
+                                            <span className="llc-line">App</span>
+                                        </div>
                                     </div>
 
     {/* DESKTOP COL */}            
                                     <PlatformTarget desktopImplementation={desktopImplementation}
                                     mobileEnabledClasses='glass-card' appendedClasses="lif-icon-col align-center">
-                                        <OnHoverIcon target="lif-icon" desktopEnabledClasses='glass-card align-center'
-                                        iconSrc="/graphics/legend/desktop.png"
-                                        hoverSrc='/graphics/legend/desktop_outline.png' alt="Desktop App"
-                                        desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => hoverOverFilter('platform', 2)}
-                                        onMouseLeave={() => hoverOverFilter(null, 0)}
-                                        override={getFilterHovered('platform', 2)}
-                                        onMouseDown={() => setAnnotationToggled('platform', 2)} />
+                                        { !desktopImplementation && legendDesktop }
+                                        { desktopImplementation && React.cloneElement(legendDesktop, {
+                                            onMouseEnter: () => hoverOverFilter('platform', 2),
+                                            onMouseLeave: () => hoverOverFilter(null, 0),
+                                            override: getFilterHovered('platform', 2),
+                                            onMouseDown: () => setAnnotationToggled('platform', 2)
+                                        }) }
 
-                                        <OnHoverIcon target="lif-icon" id="mobile-icon"
-                                        iconSrc="/graphics/legend/mobile.png" desktopEnabledClasses='glass-card align-center'
-                                        hoverSrc='/graphics/legend/mobile_outline.png' alt="Mobile App"
-                                        desktopImplementation={desktopImplementation}
-                                        onMouseEnter={() => hoverOverFilter('platform', 3)}
-                                        onMouseLeave={() => hoverOverFilter(null, 0)}
-                                        override={getFilterHovered('platform', 3)}
-                                        onMouseDown={() => setAnnotationToggled('platform', 3)} />
+                                        { !desktopImplementation && legendMobile }
+                                        { desktopImplementation && React.cloneElement(legendMobile, {
+                                            onMouseEnter: () => hoverOverFilter('platform', 3),
+                                            onMouseLeave: () => hoverOverFilter(null, 0),
+                                            override: getFilterHovered('platform', 3),
+                                            onMouseDown: () => setAnnotationToggled('platform', 3)
+                                        }) }
                                     </PlatformTarget>
                 
                                     <div className="lif-label-col align-center">
-                                        <div className="lif-icon-label">Mobile App</div>
+                                        <div className="llc">
+                                            <span className="llc-line">Mobile</span>
+                                            <span className="llc-line">App</span>
+                                        </div>
                                     </div>
                                 </div>
                 
@@ -587,35 +521,26 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
     {/* PROJECT SIZE */}            
                                     <div id="psb-container" className="lif-icon-col align-center glass-card">
                                         <div id="psb" className="project-size-bars align-center">
-                                            <div className="psb-col align-vertical"
-                                            onMouseEnter={() => hoverOverFilter('size', 1)}
-                                            onMouseLeave={() => hoverOverFilter(null, 0)}
-                                            onMouseDown={() => setAnnotationToggled('size', 1)}>
-                                                <PlatformTarget desktopEnabledClasses={`psb-${(((filterHovered.annotation == 'size'
-                                                && filterHovered.toggled > 0) || getAnnotationToggled('size') > 0)?
-                                                '' : 'in')}active`}
-                                                mobileEnabledClasses='psb-active' desktopImplementation={desktopImplementation}/>
-                                            </div>
+                                            {!desktopImplementation && legendS1}
+                                            {desktopImplementation && React.cloneElement(legendS1, {
+                                                onMouseEnter: () => hoverOverFilter('size', 1),
+                                                onMouseLeave: () => hoverOverFilter(null, 0),
+                                                onClick: () => setAnnotationToggled('size', 1)
+                                            })}
 
-                                            <div className="psb-col align-vertical"
-                                            onMouseEnter={() => hoverOverFilter('size', 2)}
-                                            onMouseLeave={() => hoverOverFilter(null, 0)}
-                                            onMouseDown={() => setAnnotationToggled('size', 2)}>
-                                                <PlatformTarget desktopEnabledClasses={`psb-${(((filterHovered.annotation == 'size'
-                                                && filterHovered.toggled > 1) || getAnnotationToggled('size') > 1)?
-                                                '' : 'in')}active`}
-                                                mobileEnabledClasses='psb-active' desktopImplementation={desktopImplementation} />
-                                            </div>
+                                            {!desktopImplementation && legendS2}
+                                            {desktopImplementation && React.cloneElement(legendS2, {
+                                                onMouseEnter: () => hoverOverFilter('size', 2),
+                                                onMouseLeave: () => hoverOverFilter(null, 0),
+                                                onClick: () => setAnnotationToggled('size', 2)
+                                            })}
 
-                                            <div className="psb-col align-vertical"
-                                            onMouseEnter={() => hoverOverFilter('size', 3)}
-                                            onMouseLeave={() => hoverOverFilter(null, 0)}
-                                            onMouseDown={() => setAnnotationToggled('size', 3)}>
-                                                <PlatformTarget desktopEnabledClasses={`psb-${(((filterHovered.annotation == 'size'
-                                                && filterHovered.toggled > 2) || getAnnotationToggled('size') > 2)?
-                                                '' : 'in')}active`}
-                                                mobileEnabledClasses='psb-active' desktopImplementation={desktopImplementation} />
-                                            </div>
+                                            {!desktopImplementation && legendS3}
+                                            {desktopImplementation && React.cloneElement(legendS3, {
+                                                onMouseEnter: () => hoverOverFilter('size', 3),
+                                                onMouseLeave: () => hoverOverFilter(null, 0),
+                                                onClick: () => setAnnotationToggled('size', 3)
+                                            })}
                                         </div>
 
                                         <div className="lif-icon" id="badge">
@@ -624,7 +549,10 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
                                     </div>
                 
                                     <div className="lif-label-col align-center">
-                                        <div className="lif-icon-label">Project Size</div>
+                                        <div className="llc">
+                                            <span className="llc-line">Project</span>
+                                            <span className="llc-line">Size</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -632,9 +560,74 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
 
                         { (desktopImplementation || (!desktopImplementation && getAnnotationToggled('mobileScreen') == 1))
                         && <div id="pl-gallery" className="align-center">
-                            <div className="header-label">
+                            {/*
+                            { desktopImplementation && <div className="header-label">
                                 Many of my projects are being imported from my old portfolio
-                                here <span className="react-link">(View Old Portfolio on Desktop)</span>. 
+                                here <span className="react-link" onPointerDown={() => gotoProject('/old_portfolio/')}>
+                                    (View Old Portfolio on Desktop)</span>. 
+                            </div> }
+                            */}
+                            <div id="cards">
+                                {/*
+                                { galleryCards.map((card, cardIndex) => (
+                                    <div className='gallery-card align-center glass-card' key={cardIndex}>
+                                        <div className="gc-content">
+                                            <div className="gc-thumbnail"
+                                            style={{backgroundImage: `url('${card.imgSrc}')`}}></div>
+                                            
+                                            <div className="gc-info align-center">
+                                                <div className="gi-left">
+                                                    <div className="gi-text">
+                                                        <div className="gi-title">
+                                                            {card.projectName}
+                                                        </div>
+                                                        <div className="gi-subtext subtext">
+                                                            {card.subtext}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="gi-right">
+                                                    <div className="gi-badges align-right">
+                                                        { card.platform > 0 && <div className='glass-card align-center'>
+                                                            <div className="gb-inside align-center">
+                                                                { card.platform === 1 && <img src="/graphics/legend/web.png"
+                                                                alt="Web App" /> }
+                                                                { card.platform === 2 && <img src="/graphics/legend/desktop.png"
+                                                                alt="Desktop App" /> }
+                                                                { card.platform === 3 && <img src="/graphics/legend/mobile.png"
+                                                                alt="Mobile App" /> }
+                                                            </div>
+                                                        </div> }
+                                                        { card.subject > 0 && <div className='glass-card align-center'>
+                                                            <div className="gb-inside align-center">
+                                                                { card.subject === 1 && <img src="/graphics/legend/gear.png"
+                                                                alt="Software Engineer" /> }
+                                                                { card.subject === 2 && <img src="/graphics/legend/java.png"
+                                                                alt="Software Developer" /> }
+                                                                { card.subject === 3 && <img src="/graphics/legend/game_controller.png"
+                                                                alt="Game Developer" /> }
+                                                            </div>
+                                                        </div> }
+                                                        <div className='glass-card align-center'>
+                                                            <div className="project-size-bars align-center">
+                                                                <div className="psb-col align-vertical">
+                                                                    <div className={`psb-${card.size > 0 ? '' : 'in'}active`}></div>
+                                                                </div>
+                                                                <div className="psb-col align-vertical">
+                                                                    <div className={`psb-${card.size > 1 ? '' : 'in'}active`}></div>
+                                                                </div>
+                                                                <div className="psb-col align-vertical">
+                                                                    <div className={`psb-${card.size > 2 ? '' : 'in'}active`}></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )) }
+                                */}
                             </div>
                         </div> }
                     </div>
@@ -642,38 +635,38 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
             </div>
 
 {/* BOTTOM NAVIGATION BAR */}
-            <div id="fr-container" className="align-center">
-                <div id="filter-row" className="dark-translucent">
-                    { !desktopImplementation && <div className="align-center">
-                        <div className={`filter-row-el align-center fr${filters.mobileScreen.toggled == 0
+            <div id="fr-container" className="dash-menu align-center">
+                <div className="dm-inner dark-translucent">
+                    { !desktopImplementation && <div className="align-center dm-platform dm-mobile">
+                        <div className={`align-center dmic${filters.mobileScreen.toggled == 0
                         ? '-selected theme-border' : ''}`} onPointerDown={() => setAnnotationToggled('mobileScreen', 0)}>
                             <div>{ getAnnotationAtIndex('mobileScreen', 0) }</div>
                         </div>
 
-                        <div className={`filter-row-el align-center fr${filters.mobileScreen.toggled > 0
+                        <div className={`align-center dmic${filters.mobileScreen.toggled > 0
                         ? '-selected theme-border' : ''}`} onPointerDown={() => setAnnotationToggled('mobileScreen', 1)}>
                             <div>{ getAnnotationAtIndex('mobileScreen', 1) }</div>
                         </div>
                     </div> }
 
-                    { desktopImplementation && <div className="align-center">
-                        <div className={`filter-row-el align-center fr${filters.subject.toggled == 0
-                        ? '-selected theme-border' : ''}`} onPointerDown={() => setAnnotationToggled('subject', 0)}>
+                    { desktopImplementation && <div className="align-center dm-platform dm-desktop">
+                        <div className={`align-center dmic${filters.subject.toggled == 0
+                        ? '-selected theme-border' : ''}`} onClick={() => setAnnotationToggled('subject', 0)}>
                             <div>{ getAnnotationAtIndex('subject', 0) }</div>
                         </div>
 
-                        <div className={`filter-row-el align-center fr${filters.subject.toggled == 1
-                        ? '-selected theme-border' : ''}`} onPointerDown={() => setAnnotationToggled('subject', 1)}>
+                        <div className={`align-center dmic${filters.subject.toggled == 1
+                        ? '-selected theme-border' : ''}`} onClick={() => setAnnotationToggled('subject', 1)}>
                             <div>{ getAnnotationAtIndex('subject', 1) }</div>
                         </div>
 
-                        <div className={`filter-row-el align-center fr${filters.subject.toggled == 2
-                        ? '-selected theme-border' : ''}`} onPointerDown={() => setAnnotationToggled('subject', 2)}>
+                        <div className={`align-center dmic${filters.subject.toggled == 2
+                        ? '-selected theme-border' : ''}`} onClick={() => setAnnotationToggled('subject', 2)}>
                             <div>{ getAnnotationAtIndex('subject', 2) }</div>
                         </div>
 
-                        <div className={`filter-row-el align-center fr${filters.subject.toggled == 3
-                        ? '-selected theme-border' : ''}`} onPointerDown={() => setAnnotationToggled('subject', 3)}>
+                        <div className={`align-center dmic${filters.subject.toggled == 3
+                        ? '-selected theme-border' : ''}`} onClick={() => setAnnotationToggled('subject', 3)}>
                             <div>{ getAnnotationAtIndex('subject', 3) }</div>
                         </div>
                     </div> }

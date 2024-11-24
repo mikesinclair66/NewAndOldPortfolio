@@ -1,0 +1,70 @@
+#ss-2{
+    background-image: url('../../../../../public/graphics/shark_small.jpeg');
+    background-size: cover;
+    padding-top: 50px;
+    
+    /*
+    .theme{
+        background-image: linear-gradient(rgb(68, 69, 75), rgb(86, 92, 114));
+    }
+
+    .theme-outline{
+        background-image: linear-gradient(rgb(255, 255, 255, 0), rgb(255, 255, 255, 0)),
+            linear-gradient(45deg, #f927e7, #e3e3e3);
+    }
+            */
+
+    .header-label, .header-label-anim{
+        font-size: 20px;
+    }
+
+    #media-outlets{
+        text-align: center;
+        margin-top: -40px;
+        margin-bottom: 18px;
+        gap: 24px;
+
+        a img{
+            height: 30px;
+        }
+
+        .custom-landing-buttons, .custom-landing-buttons-anim{
+            .clb-first{
+                background-color: white;
+            }
+
+            .custom-landing-button{
+                border-width: 1px;
+                border-radius: 40px;
+                padding: 12px 18px;
+            }
+
+            &:first-child{
+                margin-bottom: 12px;
+            }
+        }
+
+        .custom-landing-buttons-anim .clb-second{
+            color: black;
+        }
+    }
+}
+
+@media only screen and (min-width: 750px) and (min-height: 500px){
+    #ss-2{
+		background-image: url('../../../../../public/graphics/shark.jpeg');
+        padding-top: 0;
+        padding-bottom: 0;
+
+        #ss-2-inner{
+            margin-top: 24px;
+        }
+    }
+}
+
+@media only screen and (orientation: landscape) and (max-width: 825px) and (max-height: 575px){
+    #ss-2{
+        padding-top: 80px;
+        padding-bottom: 40px;
+    }
+}

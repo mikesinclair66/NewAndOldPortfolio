@@ -1,0 +1,204 @@
+#ss-0{
+    padding-top: 32px;
+    height: calc(100vh - 32px);
+    background-image: url('../../../../../public/graphics/ocean_wallpaper.png');
+    background-size: cover;
+
+    #splash-content-container{
+        #sc{
+            #sc-title, .custom-landing-buttons, .custom-landing-buttons-anim{
+                padding-left: 8px;
+            }
+
+            #sc-title{
+                margin-bottom: 14px;
+
+                h1{
+                    font-size: 66px;
+                    font-weight: 800;
+                    line-height: 1.1em;
+                    margin-bottom: 7px;
+                }
+
+                h3{
+                    font-size: 26px;
+                    padding-right: 8px;
+                    font-weight: 500;
+                }
+            }
+
+            #intro-button #ib-inner, .ib-background, .ib-background-anim{
+                width: 200px;
+                height: 70px;
+            }
+
+            #intro-button{
+                cursor: pointer;
+                margin-left: 8px;
+                display: inline-block;
+                border: solid #24292F 4px;
+
+                #ib-inner{
+                    gap: 8px;
+
+                    &:active, &:hover{
+                        .button-caption{
+                            color: white;
+                        }
+                    }
+
+                    .ib-background, .ib-background-anim{
+                        display: block;
+                        transition: 0.7s linear;
+                        position: absolute;
+                        background-color: rgba(0, 0, 0, 0.3);
+                        clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+                        pointer-events: none;
+                    }
+
+                    .ib-background-anim{
+                        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+                    }
+
+                    .button-caption{
+                        position: relative;
+                        z-index: 1;
+                        transition: 0.2s;
+                        font-weight: 500;
+                    }
+
+                    img{
+                        width: 58px;
+                        margin-top: 2px;
+                    }
+                }
+            }
+
+            .custom-landing-buttons{
+                display: inline-block;
+
+                .custom-landing-button{
+                    .clb-inner{
+                        .on-hover-icon{
+                            img{
+                                width: 52px;
+                                margin-top: 4px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #tv-container-abs{
+        display: none;
+        position: absolute;
+        bottom: 12px;
+        right: 0px;
+
+        .tca, .tca-anim{
+            gap: 12px;
+
+            #speech-bubble{
+                position: absolute;
+                z-index: -1;
+                right: 106px;
+                bottom: 152px;
+            }
+
+            #tv{
+                #clam-shells img{
+                    transition: 0.3s linear;
+                    position: absolute;
+                    z-index: 3;
+                    height: 54px;
+                }
+
+                #tv-headshot{
+                    transition: 0.5s;
+                    position: relative;
+                    z-index: 4;
+                    top: 0;
+                }
+            }
+        }
+
+        .tca{
+            cursor: pointer;
+        }
+
+        .tca-anim{
+            cursor: default;
+
+            #speech-bubble{
+                .bubble{
+                    display: none;
+                }
+            }
+
+            #tv #tv-headshot{
+                top: 180px;
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 380px) and (min-height: 750px){
+    #ss-0{
+        padding-top: 102px;
+        height: calc(100vh - 102px);
+    }
+}
+
+@media only screen and (min-width: 750px) and (min-height: 500px){
+    #ss-0{
+        height: 100vh;
+        padding-top: 0;
+        background-image: none;
+
+        #splash-content-container{
+            #sc{
+                #sc-title, .custom-landing-buttons, .custom-landing-buttons-anim{
+                    padding-left: 0;
+                }
+    
+                #sc-title{
+                    margin-bottom: 12px;
+    
+                    h1{
+                        font-size: 72px;
+                        line-height: normal;
+                        margin-bottom: 0;
+                    }
+        
+                    h3{
+                        font-size: 30px;
+                        padding-right: 0;
+                    }
+                }
+
+                #intro-button{
+                    margin-left: 0;
+                }
+
+                .custom-landing-buttons{
+                    .custom-landing-button{
+                        .clb-inner{
+                            .on-hover-icon{
+                                img{
+                                    width: 52px;
+                                    margin-top: 4px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    
+        #tv-container-abs{
+            display: block;
+        }
+    }
+}

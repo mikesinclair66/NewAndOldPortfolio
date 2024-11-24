@@ -12,7 +12,7 @@ const App: React.FC = () => {
         <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/sandbox/rusticandredefined_ca" element={<AppEmbedRustic />} />
-            <Route path="/sandbox/old_portfolio" element={<AppEmbedPortfolio />} />
+            <Route path="/sandbox/old_portfolio/" element={<AppEmbedPortfolio />} />
         </Routes>
     );
 }

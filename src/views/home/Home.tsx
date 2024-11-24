@@ -1,120 +1,32 @@
-import Ss0 from "./sections/Ss0";
-import Ss1 from './sections/Ss1';
-import Ss2 from './sections/Ss2';
-import Ss3 from './sections/Ss3';
-import Ss4 from './sections/Ss4';
-import Ss5 from './sections/Ss5';
-import scroll_to_bottom from "src/assets/scripts/scroll_to_bottom";
-import wait from '../../assets/scripts/wait.js';
+import { useScrollTransition } from './hooks/useScrollTransition';
+import { useNavMenu } from './hooks/useNavMenu';
+import React, { useState, useEffect } from 'react';
+import './home.scss';
 
-import React, { useState, useEffect, useRef } from 'react';
+import Ss0 from "./sections/ss0/Ss0";
+import Ss1 from './sections/ss1/Ss1';
+import Ss2 from './sections/ss2/Ss2';
+import Ss3 from './sections/ss3/Ss3';
+import Ss4 from './sections/ss4/Ss4';
+import Ss5 from './sections/ss5/Ss5';
+import OnHoverIcon from '../../components/on_hover_icon/OnHoverIcon';
 
 const Home: React.FC = () => {
     const [tvVaporized, setTvVaporized] = useState<boolean>(false);
     const [desktopImplementation, setDesktopImplementation] = useState<boolean>(false);
-    const [sectionId, setSectionId] = useState<number>(0);
 
-    const sectionIdentifier = useRef<number>(0);
-    const ss2 = useRef<any>(null);
-    const scrollDetectorLock = useRef<boolean>(false);//detects sectionId
-    const scrollFunctionAdded = useRef<boolean>(false);
+    const { setSectionId, scrollFunctionAdded, handleScrollTransition, sectionId, getInTouch }
+    = useScrollTransition(tvVaporized, setTvVaporized, desktopImplementation);
+    const { mmEnabled, setMmEnabled, menuOptionToggled, setMenuOptionToggled,
+        iconOptionHovered, setIconOptionHovered } = useNavMenu(desktopImplementation);
 
-    const lockScrollDetector = () => {
-        scrollDetectorLock.current = true;
-        wait(500, () => scrollDetectorLock.current = false);
+    const toggleMenuOption = (option: number) => {
+        setMenuOptionToggled(option);
+        setSectionId(option > 2? 3 : option);
     }
 
-    const handleScrollTransition = (sectionId: number) => {
-        let compareSnapLevel = (v1: number, v2: number) => v1 == 1 && v2 == 2;
-        let onSameSnapLvl = false;
-        if(compareSnapLevel(sectionIdentifier.current, sectionId) || compareSnapLevel(sectionId, sectionIdentifier.current))
-            onSameSnapLvl = true;
-
-        sectionIdentifier.current = sectionId;
-
-        let snap: number;
-        switch(sectionId){
-            case 0:
-            case 1:
-                snap = sectionId;
-                break;
-            case 2:
-                snap = 1;
-                break;
-            case 3:
-            default:
-                snap = 3;
-                break;
-        }
-
-        if(!onSameSnapLvl){
-            const sec = document.getElementById('ss-' + snap);
-            if(sec)
-                window.scrollTo({ top: sec.offsetTop, behavior: 'smooth' });
-        }
-    }
-
-    const getInTouch = () => {
-        if(scrollFunctionAdded.current){
-            lockScrollDetector();
-            setSectionId(3);
-        }
-
-        scroll_to_bottom();
-    }
-
-    const scrollFunction = (ev: WheelEvent) => {
-        if(!scrollDetectorLock.current){
-            let proceedSection = (ev: WheelEvent) => {
-                ev.preventDefault();
-                lockScrollDetector();
-                setSectionId(sectionIdentifier.current + (ev.deltaY > 0 ? 1 : -1))
-            };
-
-            switch(sectionIdentifier.current){
-                case 3:
-                    if(ev.deltaY < 0 && ss2.current && window.scrollY <= ss2.current.offsetTop + ss2.current.offsetHeight + 50)
-                        proceedSection(ev);
-                    break;
-                case 2:
-                    let coords = [ev.clientX, ev.clientY];
-                    let checkContainer = (containerId: string, coords: number[]): boolean => {
-                        let container = document.getElementById(containerId);
-                        let crect = container?.getBoundingClientRect();
-
-                        // coords are within container
-                        return (container != undefined && crect != undefined && coords[0] >= crect.left
-                        && coords[0]< crect.left + crect.width && coords[1] >= crect.top && coords[1] < crect.top + crect.height)
-                        
-                        &&
-                        
-                        // container has a scrollbar - otherwise [FAILCASE = scroll proceeds to the next section]
-                        container.scrollHeight > container.clientHeight
-                        
-                        &&
-                        
-                        // container scrollbar isn't at the bottom when the user scrolls down - otherwise FAILCASE
-                        ((container.scrollHeight - container.scrollTop - container.clientHeight >= 1 && ev.deltaY > 0)
-                    
-                        ||
-                    
-                        // container scrollbar isn't at the top when the user scrolls up - otherwise FAILCASE
-                        (container.scrollTop !== 0 && ev.deltaY < 0));
-                    }
-
-                    if(!checkContainer('filter-col', coords) && !checkContainer('projects-list', coords))
-                        proceedSection(ev);
-                    break;
-                case 0:
-                    // fall-through
-                    if(ev.deltaY > 0 && !tvVaporized)
-                        setTvVaporized(true);
-                default:
-                    proceedSection(ev);
-                    break;
-            }
-        } else
-            ev.preventDefault();
+    const toggleMobileMenuOption = (option: number) => {
+        window.scrollTo({ top: document.getElementById(`ss-${option}`)?.offsetTop, behavior: 'smooth' });
     }
 
     useEffect(() => {
@@ -128,32 +40,6 @@ const Home: React.FC = () => {
         return () => { window.removeEventListener('resize', determineDesktopPlatformImplementation); }
     }, []);
 
-    useEffect(() => {
-        ss2.current = document.getElementById('ss-2');
-
-        if(desktopImplementation){
-            if(window.scrollY < ss2.current.offsetTop)
-                setSectionId(0);
-            else {
-                let ss3 = document.getElementById('ss-3');
-                setSectionId(ss3 && window.scrollY < ss3.offsetTop ? 2 : 3);
-            }
-
-            window.addEventListener('wheel', scrollFunction, { passive: false });
-            scrollFunctionAdded.current = true;
-        } else if(scrollFunctionAdded.current){
-            window.removeEventListener('wheel', scrollFunction);
-            scrollFunctionAdded.current = false;
-        }
-
-        return () => {
-            if(desktopImplementation && scrollFunctionAdded.current)
-                window.removeEventListener('wheel', scrollFunction);
-        }
-    }, [desktopImplementation]);
-
-    useEffect(() => handleScrollTransition(sectionId), [sectionId]);
-
     return (
         <div>
             <Ss0 desktopImplementation={desktopImplementation} getInTouch={getInTouch}
@@ -165,6 +51,161 @@ const Home: React.FC = () => {
             <Ss3 desktopImplementation={desktopImplementation} getInTouch={getInTouch} />
             <Ss4 desktopImplementation={desktopImplementation} />
             <Ss5 desktopImplementation={desktopImplementation} />
+
+            { !desktopImplementation && <div id={`ham-btn${mmEnabled? '-mm' : ''}`} className="align-center">
+                <div id="hb-background">
+                    <div className="align-center">
+                        <div className="mobile-menu-link">
+                            <div className="mm-icon align-center" onPointerDown={() => toggleMobileMenuOption(0)}>
+                                <div className="mmi-inner">
+                                    <img src="/graphics/nav/intro.png" alt="Intro" />
+                                </div>
+                            </div>
+                            <div className="mm-title" onPointerDown={() => toggleMobileMenuOption(0)}>
+                                <span>Intro</span>
+                            </div>
+                        </div>
+
+                        <div className="mobile-menu-link">
+                            <div className="mm-icon align-center" onPointerDown={() => toggleMobileMenuOption(1)}>
+                                <div className="mmi-inner">
+                                    <img src="/graphics/nav/perks.png" alt="Perks" />
+                                </div>
+                            </div>
+                            <div className="mm-title" onPointerDown={() => toggleMobileMenuOption(1)}>
+                                <span>Perks</span>
+                            </div>
+                        </div>
+
+                        <div className="mobile-menu-link">
+                            <div className="mm-icon align-center" onPointerDown={() => toggleMobileMenuOption(2)}>
+                                <div className="mmi-inner">
+                                    <img src="/graphics/nav/portfolio.png" alt="Portfolio" />
+                                </div>
+                            </div>
+                            <div className="mm-title" onPointerDown={() => toggleMobileMenuOption(2)}>
+                                <span>Portfolio</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="align-center">
+                        <div className="mobile-menu-link">
+                            <div className="mm-icon align-center" onPointerDown={() => toggleMobileMenuOption(3)}>
+                                <div className="mmi-inner">
+                                    <img src="/graphics/nav/about.png" alt="About" />
+                                </div>
+                            </div>
+                            <div className="mm-title" onPointerDown={() => toggleMobileMenuOption(3)}>
+                                <span>About</span>
+                            </div>
+                        </div>
+
+                        <div className="mobile-menu-link">
+                            <div className="mm-icon align-center" onPointerDown={() => toggleMobileMenuOption(4)}>
+                                <div className="mmi-inner">
+                                    <img src="/graphics/nav/skills.png" alt="Skills" />
+                                </div>
+                            </div>
+                            <div className="mm-title" onPointerDown={() => toggleMobileMenuOption(4)}>
+                                <span>Skills</span>
+                            </div>
+                        </div>
+                        
+                        <div className="mobile-menu-link">
+                            <div className="mm-icon align-center" onPointerDown={() => toggleMobileMenuOption(5)}>
+                                <div className="mmi-inner">
+                                    <img src="/graphics/nav/updates.png" alt="Updates" />
+                                </div>
+                            </div>
+                            <div className="mm-title" onPointerDown={() => toggleMobileMenuOption(5)}>
+                                <span>Updates</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hb-inner" className="align-center glass-card" onPointerDown={() => setMmEnabled(true)}>
+                    <div id="ellipsis">&#8230;</div>
+                </div>
+            </div> }
+
+            { desktopImplementation && <nav id='navbar-1' className="align-center">
+                <div id="card">
+                    <div className="align-center" id="updates-ribbon-c">
+                        <div id="updates-ribbon-i" onClick={() => toggleMenuOption(5)} style={{ gap: '7px' }}
+                        onMouseEnter={() => setIconOptionHovered(2)} onMouseLeave={() => setIconOptionHovered(-1)}>
+                            <div id="updates-c-img" className="align-center">
+                                <img src="/graphics/nav/banner_disclosed.png" alt="Updates" />
+                            </div>
+                            <div id="updates-c-loins"></div>
+                        </div>
+                    </div>
+
+                    <div className="dash-menu align-center glass-card">
+                        <div className="dm-inner">
+                            {/*
+                            { !desktopImplementation && <div className="align-center dm-platform dm-mobile">
+                                <div className="align-center dmic" onPointerDown={() => { if(!mmEnabled) setMmEnabled(true)}}>
+                                    <div id="ellipsis">&#8230;</div>
+                                </div>
+                            </div> }
+                            */}
+
+                            <div className="align-center dm-platform">
+                                <div className={`align-center dmic${menuOptionToggled == 0? '-selected' : ''}`}
+                                onClick={() => toggleMenuOption(0)}>
+                                    <div className="dmic-label">Intro</div>
+                                </div>
+
+                                <div className={`align-center dmic${menuOptionToggled == 1? '-selected' : ''}`}
+                                onClick={() => toggleMenuOption(1)}>
+                                    <div className="dmic-label">Perks</div>
+                                </div>
+                                
+                                <div className={`align-center dmic${menuOptionToggled == 2? '-selected' : ''}`}
+                                onClick={() => toggleMenuOption(2)} style={{ gap: '7px' }}
+                                onMouseEnter={() => setIconOptionHovered(0)} onMouseLeave={() => setIconOptionHovered(-1)}>
+                                    <OnHoverIcon id="crown-i" appendedClasses='dmic-icon' iconSrc='/graphics/nav/crown.png'
+                                    hoverSrc='/graphics/nav/crown_highlight.png' desktopImplementation={desktopImplementation}
+                                    alt="Portfolio" override={iconOptionHovered == 0 || menuOptionToggled == 2} />
+
+                                    <div className="dmic-label">Portfolio</div>
+                                </div>
+
+                                <div className={`align-center dmic${menuOptionToggled == 3? '-selected' : ''}`}
+                                onClick={() => toggleMenuOption(3)}>
+                                    <div className="dmic-label">About Me</div>
+                                </div>
+
+                                <div id="skills-c" className={`align-center dmic${menuOptionToggled == 4? '-selected' : ''}`}
+                                onClick={() => toggleMenuOption(4)}
+                                onMouseEnter={() => setIconOptionHovered(1)} onMouseLeave={() => setIconOptionHovered(-1)}>
+                                    <OnHoverIcon appendedClasses='dmic-icon' iconSrc='/graphics/nav/trophynav.png'
+                                    hoverSrc='/graphics/nav/trophynav_highlight.png' desktopImplementation={desktopImplementation}
+                                    alt="Skills" override={iconOptionHovered == 1 || menuOptionToggled == 4} />
+
+                                    <div className="dmic-label">Skills</div>
+                                </div>
+
+                                <div className={`align-center dmic${menuOptionToggled == 5 || iconOptionHovered == 2
+                                ? '-selected' : ''}`} onClick={() => toggleMenuOption(5)} style={{ gap: '7px' }}
+                                onMouseEnter={() => setIconOptionHovered(2)} onMouseLeave={() => setIconOptionHovered(-1)}>
+                                    <OnHoverIcon appendedClasses='dmic-icon' iconSrc='/graphics/nav/update.png'
+                                    hoverSrc='/graphics/nav/update_highlight.png' desktopImplementation={desktopImplementation}
+                                    alt="Portfolio" override={iconOptionHovered == 2 || menuOptionToggled == 5} />
+
+                                    <div className="dmic-label">Updates</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav> }
+
+            { sectionId > 2 && <nav id="navbar-2">
+
+            </nav> }
         </div>
     );
 }

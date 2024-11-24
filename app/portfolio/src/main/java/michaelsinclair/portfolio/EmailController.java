@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import michaelsinclair.services.EmailValidatorMessage;
-import michaelsinclair.services.EmailValidatorMessenger;
-import michaelsinclair.services.EmailValidatorRequest;
+import michaelsinclair.contact.EmailValidatorMessage;
+import michaelsinclair.contact.EmailValidatorMessenger;
+import michaelsinclair.contact.EmailValidatorRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,12 +20,6 @@ import java.util.Map;
 public class EmailController {
 	@Autowired
     private EmailValidatorMessenger emailMessenger;
-	
-	private Map<String, String> loadJson(String s1, String s2){
-		Map<String, String> map = new HashMap<>();
-		map.put(s1,  s2);
-		return map;
-	}
 	
 	@PostMapping("/validate")
     public ResponseEntity<?> validate(@RequestBody String[] contactInfo){
@@ -46,6 +40,7 @@ public class EmailController {
 			reason = "Email is invalid";
 		}
 		
+		//TODO change email code validation to async
 		if(isValid)
 	        return ResponseEntity.ok(loadJson("id",
 	        	emailMessenger.sendValidation(contactInfo[0], contactInfo[1])
@@ -56,7 +51,7 @@ public class EmailController {
 	
 	@PostMapping("/verify")
 	public ResponseEntity<?> verify(@RequestBody EmailValidatorRequest evr){
-		switch(emailMessenger.requestValidation(evr)) {
+		switch(emailMessenger.requestCodeValidation(evr)) {
 			case -1:
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(loadJson("reason",
 						"An error occurred trying to locate user's verification code."));
@@ -74,5 +69,12 @@ public class EmailController {
 	@PostMapping("/send_message")
 	public ResponseEntity<Boolean> sendMessage(@RequestBody EmailValidatorMessage evm){
 		return ResponseEntity.ok(emailMessenger.sendMessage(evm));
+	}
+	
+	//load request body
+	private Map<String, String> loadJson(String s1, String s2){
+		Map<String, String> map = new HashMap<>();
+		map.put(s1,  s2);
+		return map;
 	}
 }

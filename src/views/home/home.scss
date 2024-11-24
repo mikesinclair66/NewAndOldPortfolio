@@ -1,0 +1,194 @@
+#navbar-1, #ham-btn, #ham-btn-mm{
+    transition: 0.4s;
+    position: absolute;
+    bottom: 50px;
+    width: 100%;
+    z-index: 1;
+}
+
+#ham-btn, #ham-btn-mm{
+    color: white;
+
+    #hb-background{
+        transition: 0.4s;
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        top: 20px;
+        z-index: 2;
+
+        .align-center{
+            gap: 11px;
+
+            &:first-child{
+                margin-top: 11px;
+            }
+
+            .mobile-menu-link{
+                color: white;
+
+                .mm-icon{
+                    height: 84px;
+
+                    .mmi-inner{
+                        width: auto;
+                        height: 64px;
+                    }
+                }
+
+                .mm-title{
+                    text-align: center;
+                    width: 100%;
+                    margin-top: 6px;
+                }
+            }
+        }
+    }
+
+    #hb-inner{
+        transition: 0.5s;
+        width: 88px;
+        height: 46px;
+
+        #ellipsis{
+            transition: 0.2s;
+            font-size: 30px;
+            margin-top: -18px;
+        }
+    }
+}
+
+#ham-btn{
+    bottom: 50px;
+
+    #hb-background{
+        opacity: 0;
+        pointer-events: none;
+        clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    }
+
+    #hb-inner{
+        backdrop-filter: blur(3px);
+    }
+}
+
+#ham-btn-mm{
+    bottom: calc(50% - 160px);
+
+    #hb-background{
+        opacity: 1;
+        pointer-events: auto;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    #hb-inner{
+        width: 320px;
+        height: 320px;
+        backdrop-filter: blur(11px);
+
+        #ellipsis{
+            opacity: 0;
+        }
+    }
+}
+
+#navbar-2{
+    position: fixed;
+}
+
+@media only screen and (min-width: 380px) and (min-height: 750px){
+    #ham-btn, #ham-btn-mm{
+        color: white;
+    
+        #hb-background{
+            top: 18px;
+
+            .align-center{
+                .mobile-menu-link{
+                    .mm-icon{
+                        .mmi-inner{
+                            width: auto;
+                            height: 67px;
+                        }
+                    }
+
+                    .mm-title{
+                        font-size: 18px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 750px) and (min-height: 500px){
+    #navbar-1{
+        #card{
+            #updates-ribbon-c{
+                width: 100%;
+                margin-bottom: 9px;
+
+                #updates-ribbon-i{
+                    cursor: pointer;
+
+                    #updates-c-img{
+                        width: 100%;
+                        margin-bottom: -70px;
+
+                        img{
+                            width: 202px;
+                            position: relative;
+                            z-index: 1;
+                        }
+                    }
+
+                    #updates-c-loins{
+                        width: 248px;
+                        height: 32px;
+                        margin-bottom: -82px;
+                        border-radius: 24px 24px 0 0;
+                        display: block;
+                        background-image: linear-gradient(to bottom, #BF0000, #FF3636, #FF3636, #C70000);
+                    }
+                }
+            }
+
+            .dash-menu{
+                backdrop-filter: blur(2px);
+                padding-top: 52px;
+    
+                .dm-inner{
+                    #skills-c{
+                        gap: 8px;
+                    }
+    
+                    .dmic, .dmic-selected{
+                        transition: 0.4s ease;
+                        cursor: pointer;
+    
+                        .on-hover-icon{
+                            .icon, .hover-icon, .hover-icon-overriden{
+                                height: 28px;
+                            }
+                        }
+    
+                        #crown-i{
+                            position: relative;
+                            bottom: 1px;
+                        }
+    
+                        .dmic-label{
+                            font-weight: 700;
+                        }
+                    }
+    
+                    .dmic:hover, .dmic:active, .dmic-selected{
+                        background-color: rgba(255, 255, 255, 0.3);
+                        color: #AD0ADC;
+                        font-size: 22px;
+                    }
+                }
+            }
+        }
+    }
+}

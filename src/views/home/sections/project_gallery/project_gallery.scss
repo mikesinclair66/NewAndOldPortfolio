@@ -1,39 +1,12 @@
 #ss-2{
     #ss-2-inner{
+        width: 100%;
+
         #lol{
             color: white;
 
             .dark-translucent{
                 background-color: rgba(40, 45, 84, 0.6);
-            }
-
-            .filters-translucent{
-
-            }
-
-            .glass-card{
-                position: relative;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 15px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                overflow: hidden;
-                box-sizing: border-box;
-
-                &::before{
-                    content: "";
-                    border-radius: inherit;
-                    position: absolute;
-                    pointer-events: none;
-                    top: 2px;
-                    left: 2px;
-                    right: 2px;
-                    bottom: 2px;
-                    padding: 2px;
-                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 28px);
-                    
-                    pointer-events: none;
-                    z-index: -1;
-                }
             }
 
             .project-size-bars{
@@ -69,7 +42,7 @@
             }
 
             #main-interface{
-                height: 320px;
+                height: 420px;
 
                 .cursor-highlight{
                     transition: 0.2s;
@@ -81,7 +54,8 @@
                     }
                 }
 
-                #filter-col #mi-header, #filter-col .fc-section .fc-header, #projects-list #pl-header{
+                #filter-col #mi-header, #filter-col .fc-section .fc-header, #filter-col .fc-section .fc-header-anim,
+                #projects-list #pl-header{
                     height: 48px;
                 }
 
@@ -110,15 +84,19 @@
     
                 #filter-col{
                     border-radius: 27px;
-                    width: 260px;
+                    //width: 260px;
+                    width: calc(100% - 80px);
     
                     #mi-header{
-                        border-bottom: solid rgba(157, 168, 255, 0.25) 1px;
                         border-radius: 27px 0 0 0;
+                    }
+
+                    #mi-header, .fc-section .fc-header-anim{
+                        border-bottom: solid rgba(157, 168, 255, 0.25) 1px;
                     }
     
                     .fc-section{
-                        .fc-header{
+                        .fc-header, .fc-header-anim{
                             padding-left: 17px;
                             padding-right: 12px;
     
@@ -249,7 +227,7 @@
         
                                     #range-duration{
                                         height: 100%;
-                                        background-image: linear-gradient(-135deg, #ffc2fa, #f927e7, #a20495)
+                                        background-image: linear-gradient(-135deg, #fc5def, #b61ea9)
                                     }
             
                                     #range-indication{
@@ -273,7 +251,7 @@
                 #projects-list{
                     background-color: rgba(52, 79, 108, 0.6);
                     border-radius: 0 0 27px 27px;
-                    width: 320px;
+                    width: calc(100% - 50px);
     
                     #pl-header{
                         margin-top: 2px;
@@ -329,14 +307,21 @@
                     }
 
                     #pl-body{
+                        height: calc(100% - 58px);
+
                         #pl-legend{
+                            height: 100%;
+
                             #pll-icon-title{
                                 display: none;
                             }
     
                             #pll-inner{
+                                position: relative;
+                                bottom: 5px;
+
                                 .lif-icon-row{
-                                    gap: 8px;
+                                    gap: 12px;
                                     margin-bottom: 8px;
                                     height: 58px;
         
@@ -358,11 +343,17 @@
                                         &:first-child{
                                             text-align: right;
                                         }
+
+                                        .llc{
+                                            width: 100%;
+                                            display: flex;
+                                            flex-direction: column;
+                                        }
                                     }
         
                                     .lif-icon-col{
                                         gap: 8px;
-                                        width: 48%;
+                                        width: 145px;
         
                                         .lif-icon{
                                             position: relative;
@@ -387,49 +378,101 @@
                         }
 
                         #pl-gallery{
-                            height: 270px;
+                            margin-top: 12px;
 
-                            .header-label{
-                                width: 80%;
-                                text-align: center;
-                                font-size: 18px;
-                                transform: translateY(-50%);
+                            #cards, #cards .gallery-card .gc-content{
+                                display: flex;
+                                flex-direction: column;
+                            }
+
+                            #cards{
+                                width: calc(100% - 20px);
+
+                                .gallery-card, .gallery-card .gc-content, .gc-thumbnail{
+                                    width: 100%;
+                                }
+
+                                .gallery-card{
+                                    padding: 7px 0;
+                                    border-radius: 7px;
+    
+                                    .gc-content{
+                                        width: calc(100% - 14px);
+
+                                        .gc-thumbnail, .gc-info{
+                                            width: 100%;
+                                        }
+    
+                                        .gc-thumbnail{
+                                            height: 160px;
+                                            background-size: cover;
+                                            border-radius: 9px;
+                                        }
+
+                                        .gc-info{
+                                            margin-top: 6px;
+
+                                            .gi-left, .gi-right{
+                                                width: 50%;
+                                                height: 100%;
+                                            }
+
+                                            .gi-left{
+                                                .gi-text{
+                                                    .gi-title{
+                                                        font-family: "Akagi-pro", sans-serif;
+                                                    }
+                                                }
+                                            }
+
+                                            .gi-right{
+                                                .gi-badges{
+                                                    gap: 4px;
+
+                                                    .glass-card{
+                                                        height: 35px;
+
+                                                        .gb-inside{
+                                                            width: 35px;
+
+                                                            img{
+                                                                height: 24px;
+                                                            }
+                                                        }
+
+                                                        .project-size-bars{
+                                                            width: 68px;
+                                                            gap: 3px;
+                                                            position: relative;
+                                                            left: 1px;
+
+                                                            .psb-col{
+                                                                width: 18px;
+
+                                                                .psb-active, .psb-inactive{
+                                                                    height: 2px;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
 
-            #fr-container #filter-row{
-                display: inline-block;
+            #fr-container{
                 margin-top: 14px;
-                border-radius: 27px;
-                padding: 8px 18px 8px 18px;
-    
-                .fr, .fr-selected{
-                    height: 34px;
-                    padding-left: 14px;
-                    padding-right: 14px;
-                    border-radius: 18px;
-                    margin-left: 2px;
-                    margin-right: 2px;
-                }
-    
-                .fr{
-                    border: solid rgba(255, 255, 255, 0) 1px;//matches size duration of theme-border
-    
-                    &, div{
-                        cursor: pointer;
-                    }
-    
+
+                .dm-inner .dmic{
                     &:hover, &:active{
                         background-color: rgba(70, 75, 114, 0.45);
                     }
-                }
-    
-                .fr-selected{
-                    cursor: default;
-                    background-color: rgba(70, 75, 114, 0.6);
                 }
             }
         }
@@ -440,24 +483,18 @@
     #ss-2{
         #ss-2-inner{
             #lol{
-                .glass-card::before{
-                    top: 1px;
-                    left: 1px;
-                    right: 1px;
-                    bottom: 1px;
-                    padding: 1px;
-                }
-
                 #main-interface{
                     height: 498px;
 
                     #filter-col{
                         border-radius: 40px 0 0 40px;
+                        width: 260px;
                     }
     
                     #projects-list{
                         border-radius: 0 40px 40px 0;
                         width: 600px;
+                        //width: calc(100% - 20px);
 
                         #pl-header #pl-center .header-label, #pl-header #pl-center .header-label-anim,
                         #pl-body #pl-legend #pll-inner{
@@ -465,6 +502,10 @@
                         }
 
                         #pl-header{
+                            position: relative;
+                            right: 2px;
+                            top: 1px;
+
                             #pl-center{
                                 width: 100%;
 
@@ -482,6 +523,10 @@
                             }
                         }
 
+                        #pl-body, #pl-body #pl-legend{
+                            height: auto;
+                        }
+
                         #pl-body{
                             #pl-legend{
                                 #pll-icon-title{
@@ -489,6 +534,7 @@
                                 }
     
                                 #pll-inner{
+                                    bottom: 0;
                                     padding: 3px 0;
                                     height: 68px;
                                     border-radius: 0 0 15px 15px;
@@ -527,6 +573,7 @@
                                         &:first-child, &:last-child{
                                             position: static;
                                         }
+
                                         position: relative;
                                         top: 4px;
                                     }
