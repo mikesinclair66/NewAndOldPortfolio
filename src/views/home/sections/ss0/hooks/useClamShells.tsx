@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import wait from '../../../../../assets/scripts/wait';
 
-export const useClamShellsAndTV = (tvVaporized: boolean, setTvVaporized: any, desktopImplementation: boolean) => {
+export const useClamShells = (tvVaporized: boolean, setTvVaporized: any, desktopImplementation: boolean) => {
     const [csCoords, setCsCoords] = useState<number[][]>([[136, 48], [136, 48], [136, 48], [136, 48], [136, 48], [136, 48]]);
     const [csDisplays, setCsDisplays] = useState<boolean[]>([false, false, false, false, false, false]);
     const [csIndices, setCsIndices] = useState<number[]>([0, 0, 0, 0]);

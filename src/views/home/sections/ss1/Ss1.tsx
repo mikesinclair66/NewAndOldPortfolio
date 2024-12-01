@@ -42,7 +42,7 @@ const Ss1: React.FC<Ss1Props> = ({ desktopImplementation, horizontalSlideToggled
             <div id="pitch-deck">
                 <div id="pitch">
                     <div id="pitch-headers">
-                        <h1>If you hire me, I&#39;ll...</h1>
+                        <h1>If you hire me, I&#39;ll</h1>
                         <h3>&#8227; Care for your business/team as if it were my own</h3>
                         <h3>&#8227; Manage many responsibilities under minimal supervision</h3>
                         <h3>&#8227; Embrace change and high pressure as opportunities for growth</h3>

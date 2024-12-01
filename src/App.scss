@@ -207,7 +207,7 @@ img{
         padding: 8px 18px 8px 18px;
 
         .dm-platform{
-            .dmic, .dmic-selected{
+            .dmic, .dmic-selected, .dmic-hovered{
                 cursor: pointer;
                 height: 34px;
                 padding-left: 14px;
@@ -217,9 +217,11 @@ img{
                 margin-right: 2px;
             }
     
+            /*
             .dmic{
                 border: solid rgba(255, 255, 255, 0) 2px;//matches size duration of theme-border
             }
+                */
     
             .dmic-selected{
                 cursor: default;

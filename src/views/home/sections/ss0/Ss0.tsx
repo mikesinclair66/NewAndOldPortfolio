@@ -1,6 +1,6 @@
 import './ss0.scss';
 import '../../../../assets/styles/bubble.scss';
-import { useClamShellsAndTV } from './hooks/useClamShellsAndTV';
+import { useClamShells } from './hooks/useClamShells';
 import wait from '../../../../assets/scripts/wait';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -16,12 +16,16 @@ interface Ss0Props {
     scrollFunctionAdded: boolean;
     setTvVaporized: () => void;
     getInTouch: () => void;
+    selectDmic: (i: number) => void;
+    hoverDmic: (i: number) => void;
+    resetDmic: (i: number) => void;
 }
 
-const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFunctionAdded, setTvVaporized, getInTouch }) => {
+const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFunctionAdded, setTvVaporized, getInTouch,
+selectDmic, hoverDmic, resetDmic }) => {
     const [splashSectLoading, setSplashSectLoading] = useState<boolean>(true);
     const [customHighlight, setCustomHighlight] = useState<boolean>(false);
-    const { csCoords, csDisplays, csLaunched, tvDisplay } = useClamShellsAndTV(tvVaporized, setTvVaporized, desktopImplementation);
+    const { csCoords, csDisplays, csLaunched, tvDisplay } = useClamShells(tvVaporized, setTvVaporized, desktopImplementation);
 
     useEffect(() => wait(100, () => setSplashSectLoading(false)), []);
 
@@ -43,35 +47,13 @@ const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFun
                         <h3>and you&#39;re about to dive in an ocean of great software designs and experience.</h3>
                     </div>
 
-{/*
-                    <Anim id="clb-0" target="custom-landing-buttons" toggled={customHighlight}
-                    onPointerDown={scrollAllTheWay}>
-                        <div className="custom-landing-button clb-first">
-                            <div className="align-center clb-inner" style={{ opacity: 0, pointerEvents: 'none' }}>
-                                <span className="button-caption">Get In Touch</span>
-                                <OnHoverIcon iconSrc="/graphics/media/gmail_black.png"
-                                hoverSrc="/graphics/media/gmail.png" alt="Email Michael"
-                                desktopImplementation={desktopImplementation} />
-                            </div>
-                        </div>
-
-                        <div className="custom-landing-button clb-second">
-                            <div className="align-center clb-inner">
-                                <span className="button-caption">Get In Touch</span>
-                                <OnHoverIcon iconSrc="/graphics/media/gmail_black.png"
-                                hoverSrc="/graphics/media/gmail.png" alt="Email Michael"
-                                desktopImplementation={desktopImplementation} />
-                            </div>
-                        </div>
-                    </Anim>
-*/}
-
-                    <div id="intro-button" onPointerDown={scrollAllTheWay} onMouseEnter={() => setCustomHighlight(true)}
-                    onMouseLeave={() => setCustomHighlight(false)}>
+                    <div id="intro-button" onPointerDown={scrollAllTheWay}
+                    onMouseEnter={() => { setCustomHighlight(true); hoverDmic(3); }}
+                    onMouseLeave={() => { setCustomHighlight(false); resetDmic(3); }} onClick={() => selectDmic(3)}>
                         <div id="ib-inner" className="align-center">
                             <Anim target="ib-background" toggled={customHighlight}></Anim>
 
-                            <div className="button-caption">Get In Touch</div>
+                            <div className="button-caption">Let&#39;s Connect</div>
                             <OnHoverIcon iconSrc="/graphics/media/gmail_black.png"
                             hoverSrc="/graphics/media/gmail.png" alt="Email Michael"
                             desktopImplementation={desktopImplementation} override={customHighlight} />
@@ -87,7 +69,7 @@ const Ss0: React.FC<Ss0Props> = ({ desktopImplementation, tvVaporized, scrollFun
                             <span className="bubble-text">If you hire me, I&#39;ll...</span>
                         </div>
                     </div>
-                    <div id="tv">
+                    <div id="tv" onClick={() => selectDmic(1)} onMouseEnter={() => hoverDmic(1)} onMouseLeave={() => resetDmic(1)}>
                         <div id="clam-shells">
                             <img src="/graphics/shells/1.png" alt="Michael Sinclair&#8230;s Portfolio"
                             style={{

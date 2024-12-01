@@ -130,6 +130,7 @@
 
                 #updates-ribbon-i{
                     cursor: pointer;
+                    margin-bottom: -84px;
 
                     #updates-c-img{
                         width: 100%;
@@ -142,30 +143,40 @@
                         }
                     }
 
-                    #updates-c-loins{
-                        width: 248px;
-                        height: 32px;
-                        margin-bottom: -82px;
-                        border-radius: 24px 24px 0 0;
+                    #updates-c-loins, #updates-c-loins-cut{
+                        width: 212px;
                         display: block;
-                        background-image: linear-gradient(to bottom, #BF0000, #FF3636, #FF3636, #C70000);
+                        position: relative;
+                        bottom: 1px;
+                    }
+
+                    #updates-c-loins{
+                        background-image: linear-gradient(to bottom, #BF0000, #FF3636, #C70000);
+                        border-radius: 10px 10px 0 0;
+                        height: 48px;
+                    }
+
+                    #updates-c-loins-cut{
+                        clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 0, 0 100%);
+                        background-color: #BF0000;
+                        height: 22px;
                     }
                 }
             }
 
             .dash-menu{
                 backdrop-filter: blur(2px);
-                padding-top: 52px;
+                padding-top: 60px;
     
                 .dm-inner{
                     #skills-c{
                         gap: 8px;
                     }
-    
-                    .dmic, .dmic-selected{
-                        transition: 0.4s ease;
+
+                    .dmic, .dmic-selected, .dmic-hovered{
+                        transition: 0.2s ease;
                         cursor: pointer;
-    
+
                         .on-hover-icon{
                             .icon, .hover-icon, .hover-icon-overriden{
                                 height: 28px;
@@ -181,11 +192,15 @@
                             font-weight: 700;
                         }
                     }
-    
-                    .dmic:hover, .dmic:active, .dmic-selected{
-                        background-color: rgba(255, 255, 255, 0.3);
+
+                    .dmic:hover, .dmic:active, .dmic-selected, .dmic-hovered{
                         color: #AD0ADC;
                         font-size: 22px;
+                    }
+    
+                    .dmic:hover, .dmic:active, .dmic-hovered:hover, .dmic-hovered:active, .dmic-selected{
+                        background-color: rgba(255, 255, 255, 0.3);
+                        
                     }
                 }
             }

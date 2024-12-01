@@ -599,7 +599,19 @@
                             }
 
                             #pl-gallery{
-                                height: 374px;
+                                height: 362px;
+
+                                #promo-label{
+                                    width: 100%;
+                                    text-align: center;
+                                    padding-left: 20%;
+                                    padding-right: 20%;
+                                    transform: translateY(-30%);
+                                }
+
+                                #cards{
+                                    display: none;
+                                }
                             }
                         }
                     }

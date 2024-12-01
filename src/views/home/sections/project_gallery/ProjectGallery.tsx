@@ -560,13 +560,11 @@ const ProjectGallery: React.FC<PGProps> = ({ desktopImplementation }) => {
 
                         { (desktopImplementation || (!desktopImplementation && getAnnotationToggled('mobileScreen') == 1))
                         && <div id="pl-gallery" className="align-center">
-                            {/*
-                            { desktopImplementation && <div className="header-label">
+                            { desktopImplementation && <div className="header-label" id="promo-label">
                                 Many of my projects are being imported from my old portfolio
-                                here <span className="react-link" onPointerDown={() => gotoProject('/old_portfolio/')}>
+                                here <span className="react-link" onPointerDown={() => goToVueProject('/old_portfolio/')}>
                                     (View Old Portfolio on Desktop)</span>. 
                             </div> }
-                            */}
                             <div id="cards">
                                 {/*
                                 { galleryCards.map((card, cardIndex) => (
