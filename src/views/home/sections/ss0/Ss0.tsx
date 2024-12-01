@@ -48,14 +48,14 @@ selectDmic, hoverDmic, resetDmic }) => {
                     </div>
 
                     <div id="intro-button" onPointerDown={scrollAllTheWay}
-                    onMouseEnter={() => { setCustomHighlight(true); hoverDmic(3); }}
-                    onMouseLeave={() => { setCustomHighlight(false); resetDmic(3); }} onClick={() => selectDmic(3)}>
+                    onMouseEnter={() => { setCustomHighlight(true); hoverDmic(5); }}
+                    onMouseLeave={() => { setCustomHighlight(false); resetDmic(5); }} onClick={() => selectDmic(3)}>
                         <div id="ib-inner" className="align-center">
                             <Anim target="ib-background" toggled={customHighlight}></Anim>
 
-                            <div className="button-caption">Let&#39;s Connect</div>
-                            <OnHoverIcon iconSrc="/graphics/media/gmail_black.png"
-                            hoverSrc="/graphics/media/gmail.png" alt="Email Michael"
+                            <div className="button-caption">Follow Me</div>
+                            <OnHoverIcon iconSrc="/graphics/nav/update.png"
+                            hoverSrc="/graphics/nav/update_highlight.png" alt="Email Michael"
                             desktopImplementation={desktopImplementation} override={customHighlight} />
                         </div>
                     </div>

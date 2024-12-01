@@ -15,15 +15,15 @@ const CloudSet: React.FC<CloudSetProps> = ({ zLvl, addToBase }) => {
 
     return (
         <group>
-            <ImagePlane position={new Vector3(0, -0.5 + getYCurvature(0), zLvl)} />
+            <ImagePlane position={new Vector3(0, -0.5 + getYCurvature(0), zLvl)} opacity={1} />
 
             { Array.from({ length: addToBase }, (_: number, index: number) => (
                 <group key={`cloud-mirror-${index}`}>
                     <ImagePlane position={new Vector3(-2 - index * 2, -0.5 - getYCurvature(-index),
-                    zLvl)} key={`cloud-z${zLvl}-i${index}`} />
+                    zLvl)} key={`cloud-z${zLvl}-i${index}`} opacity={1} />
 
                     <ImagePlane position={new Vector3(2 + index * 2, -0.5 + getYCurvature(index),
-                    zLvl)} key={`cloud-z${zLvl}-i${1 + index + addToBase}`} />
+                    zLvl)} key={`cloud-z${zLvl}-i${1 + index + addToBase}`} opacity={1} />
                 </group>
             )) }
         </group>
