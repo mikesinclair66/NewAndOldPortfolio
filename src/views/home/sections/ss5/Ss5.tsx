@@ -67,7 +67,15 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
     }
 
     const [backtrackPlacement, setBacktrackPlacement] = useState<number>(-1);
+    const CLOUD_ROWS = useRef<number>(0);
     const cloudMapping = useRef<any[]>([]);
+
+    const [opacityMapping, assignOpacityMapping] = useState<number[]>([]);
+    const opacityMappingLength = useRef<number>(0);
+
+    const setOpacityMapping = (index: number, opacity: number) => {
+        assignOpacityMapping(opacityMapping.map((oldOpacity: number, i: number) => (index === i? opacity : oldOpacity)));
+    }
 
     useEffect(() => {
         if(backtrackPlacement === -1){
@@ -86,6 +94,7 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
                     let scale = new THREE.Vector3(2, 2, 1);
                     let initialOpacity = get_random_float(1, 0.85);
                     cloudMapping.current.push({ pos, rotation, scale, initialOpacity });
+                    ++opacityMappingLength.current;
 
                     if(!allSpawned && distanceCounter <= -distance)
                         allSpawned = true;//end the loop after this set
@@ -97,12 +106,27 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
                     spawnCloud(i);
                     spawnCloud(-i);
                 }
+
+                ++CLOUD_ROWS.current;
             }
 
             setBacktrackPlacement(FURTHEST_Z.current);
+            let _opacityMapping: number[] = [];
+            for(let i = 0; i < opacityMappingLength.current; i++)
+                _opacityMapping.push(1);
+            assignOpacityMapping(_opacityMapping);
         }
     }, [FURTHEST_Z, FURTHEST_Z_INITIAL_VALUE, XLEVELS_TO_FILL, XDISPERSION,
         FLOOR_LEVEL_DISPLACEMENT, backtrackPlacement]);
+
+    const [cloudRowsPassed, setCloudRowsPassed] = useState<number>(0);
+    const cloudIndicesBeingScanned = useRef<number[]>([]);
+    useEffect(() => {
+        cloudIndicesBeingScanned.current = [];
+        let indexAmount = (XLEVELS_TO_FILL * 2 + 1), startIndex = cloudRowsPassed * indexAmount;
+        for(let i = startIndex; i < startIndex + indexAmount; i++)
+            cloudIndicesBeingScanned.current.push(i);
+    }, [cloudRowsPassed]);
 
     const DELTA_SLOW = 0.4;
     useFrame((_: any, delta: any) => {
@@ -110,7 +134,14 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
             START_TRACK.current.position.z += delta * DELTA_SLOW;
             TRANSPORT_TRACK.current.position.z += delta * DELTA_SLOW;
 
-
+            let trackz = START_TRACK.current.position.z;
+            if(CLOUD_ROWS.current !== 0 && trackz >= FURTHEST_Z_INITIAL_VALUE){
+                //setCloudRowsPassed(cloudRowsPassed + 1);
+                for(let index of cloudIndicesBeingScanned.current){
+                    if(trackz + cloudMapping.current[index].pos.z >= FURTHEST_Z_INITIAL_VALUE)
+                        setOpacityMapping(index, 1 - opacityMapping[index]);
+                }
+            }
         }
     });
 
@@ -118,13 +149,15 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
         <>
             <group ref={START_TRACK} position={new THREE.Vector3(0, 0, FURTHEST_Z_INITIAL_VALUE)}>
             { cloudMapping.current.map((cloud, index) => (
-                <CloudRender key={`track1-cloud-${index}`} position={cloud.pos} opacity={cloud.initialOpacity} />
+                <CloudRender key={`track1-cloud-${index}`} position={cloud.pos}
+                opacity={cloud.initialOpacity * opacityMapping.current[index]} />
             ))}
             </group>
 
             { backtrackPlacement != -1 && <group ref={TRANSPORT_TRACK} position={new THREE.Vector3(0, 0, backtrackPlacement)}>
                 {cloudMapping.current.map((cloud, index) => (
-                    <CloudRender key={`track2-cloud-${index}`} position={cloud.pos} opacity={cloud.initialOpacity} />
+                    <CloudRender key={`track2-cloud-${index}`} position={cloud.pos}
+                    opacity={cloud.initialOpacity * (1 - opacityMapping.current[index])} />
                 ))}
             </group> }
         </>
@@ -144,10 +177,10 @@ const Ss5: React.FC<Ss5Props> = ({ desktopImplementation }) => {
             {/* <Clouds ss5={ss5} /> */}
             <Canvas camera={{ position: [0, 0, 15], fov: 75 }} onCreated={({ scene }) => {
                 // Color, near, far
-                scene.fog = new THREE.Fog(0x000000, 5, 15);//linear fog
+                //scene.fog = new THREE.Fog(0xaaaaaa, 5, 15);//linear fog
 
                 // Color, density
-                //scene.fog = new FogExp2(0xaaaaaa, 0.05);//exponential fog
+                scene.fog = new THREE.FogExp2(0xaaaaaa, 0.05);//exponential fog
             }}>
                 <perspectiveCamera ref={CAMERA} position={[0, 0, 0]} />
                 <ambientLight intensity={0.8} />
