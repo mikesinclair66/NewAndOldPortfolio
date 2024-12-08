@@ -1,5 +1,5 @@
 import './ss5.scss';
-import { useLoader, Canvas } from "@react-three/fiber";
+import { useLoader, Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import React, { useRef, useMemo, RefObject, useState } from 'react';
 import get_random_float from '../../../../assets/scripts/get_random_float';
@@ -35,9 +35,8 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
      * NEAREST_Z should be where the first cloud is loaded from the start track (at the end of its opacity transition)
      * NEAREST_ZSPAWN should be where the first cloud is loaded (at the start of its opacity transition)
      */
-    const NEAREST_Z = 16, NEAREST_ZSPAWN = NEAREST_Z - OPACITY_TRANSITION_OUT, NEAREST_ZTEST = NEAREST_Z - 3;
-    const FURTHEST_Z = useRef<number>(NEAREST_ZTEST);
-    const FURTHEST_Z_INITIAL_VALUE = FURTHEST_Z.current;
+    const NEAREST_Z = 13, NEAREST_ZSPAWN = NEAREST_Z - OPACITY_TRANSITION_OUT, FURTHEST_Z_INITIAL_VALUE = NEAREST_Z;
+    const FURTHEST_Z = useRef<number>(0);
 
     /* Two tracks:
      * Start track / Ladder transport track
@@ -67,15 +66,21 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
         return clutterCount === 0? getRangeValue(ZGAP) : 0;
     }
 
-    const [backtrackPlacement, setBacktrackPlacement] = useState<number>(0);
-
     const SPAWN_COUNT = useRef<number>(0);
+    const [backtrackPlacement, setBacktrackPlacement] = useState<number>(-1);
+
     const spawnClouds = useMemo(() => {
         const temp: any[] = [];
 
-        if(SPAWN_COUNT.current === 2){
-            SPAWN_COUNT.current = 0;
-            FURTHEST_Z.current = FURTHEST_Z_INITIAL_VALUE;
+        switch(SPAWN_COUNT.current){
+            case 0:
+                FURTHEST_Z.current = FURTHEST_Z_INITIAL_VALUE;
+                break;
+            case 2:
+                SPAWN_COUNT.current = 0;
+                FURTHEST_Z.current = FURTHEST_Z_INITIAL_VALUE;
+                setBacktrackPlacement(-1);
+                break;
         }
 
         let allSpawned = false;
@@ -102,13 +107,22 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
             }
         }
 
-        /*
-        if(++SPAWN_COUNT.current === 2)
+        if(++SPAWN_COUNT.current === 1)
             setBacktrackPlacement(FURTHEST_Z.current);
-        */
 
         return temp;
-    }, [FURTHEST_Z]);
+    }, [FURTHEST_Z, FURTHEST_Z_INITIAL_VALUE, SPAWN_COUNT, XLEVELS_TO_FILL, XDISPERSION,
+        FLOOR_LEVEL_DISPLACEMENT, setBacktrackPlacement]);
+
+    const DELTA_SLOW = 0.4;
+    useFrame((_: any, delta: any) => {
+        if(START_TRACK.current && TRANSPORT_TRACK.current){
+            START_TRACK.current.position.z += delta * DELTA_SLOW;
+            TRANSPORT_TRACK.current.position.z += delta * DELTA_SLOW;
+
+            
+        }
+    });
 
     return (
         <>
@@ -118,13 +132,11 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
             ))}
             </group>
 
-            {/*
-            <group ref={TRANSPORT_TRACK} position={new THREE.Vector3(0, 0, backtrackPlacement)}>
-            { spawnClouds.map((cloud, index) => (
-                <ImagePlane key={`track2-cloud-${index}`} position={cloud.pos} opacity={0} />
-            ))}
-            </group>
-            */}
+            { backtrackPlacement != -1 && <group ref={TRANSPORT_TRACK} position={new THREE.Vector3(0, 0, backtrackPlacement)}>
+                {spawnClouds.map((cloud, index) => (
+                    <ImagePlane key={`track2-cloud-${index}`} position={cloud.pos} opacity={1} />
+                ))}
+            </group> }
         </>
     )
 }
@@ -140,7 +152,13 @@ const Ss5: React.FC<Ss5Props> = ({ desktopImplementation }) => {
     return (
         <div id="ss-5" className="scroll-section" ref={SS5}>
             {/* <Clouds ss5={ss5} /> */}
-            <Canvas camera={{ position: [0, 0, 15], fov: 75 }}>
+            <Canvas camera={{ position: [0, 0, 15], fov: 75 }} onCreated={({ scene }) => {
+                // Color, near, far
+                scene.fog = new THREE.Fog(0x000000, 5, 15);//linear fog
+
+                // Color, density
+                //scene.fog = new FogExp2(0xaaaaaa, 0.05);//exponential fog
+            }}>
                 <perspectiveCamera ref={CAMERA} position={[0, 0, 0]} />
                 <ambientLight intensity={0.8} />
                 <pointLight position={[10, 10, 10]} />
