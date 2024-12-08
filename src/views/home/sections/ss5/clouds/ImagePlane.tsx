@@ -1,7 +1,6 @@
-import { useLoader, extend } from "@react-three/fiber";
-import { Mesh, ShaderMaterial, SpriteMaterial, TextureLoader, Vector3, Sprite, MathUtils, Color,
-    SpriteMaterialParameters } from "three";
-import React, { useRef, useEffect } from 'react';
+import { useLoader } from "@react-three/fiber";
+import { SpriteMaterial, TextureLoader, Vector3 } from "three";
+import React from 'react';
 
 interface IPProps {
     position: Vector3;
@@ -17,6 +16,7 @@ const ImagePlane: React.FC<IPProps> = ({ position, opacity }) => {
         color: "#f0f0f0"
     });
   
+    console.log(`drawing at (x=${position.x},y=${position.y},z=${position.z})`);
     return (
         <sprite position={position} scale={[2, 2, 1]} material={material} />
     );
