@@ -9,7 +9,7 @@ interface IPProps {
     opacity: number;
 }
 
-const ImagePlane: React.FC<IPProps> = ({ position, opacity }) => {
+const CloudRender: React.FC<IPProps> = ({ position, opacity }) => {
     const material = new THREE.SpriteMaterial({
         map: useLoader(THREE.TextureLoader, '/graphics/cloud.png'),
         transparent: true,
@@ -93,7 +93,8 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
                 let pos = new THREE.Vector3(xlevel * XDISPERSION, FLOOR_LEVEL_DISPLACEMENT, distanceCounter);
                 let rotation = new THREE.Vector3(0, 0, 0);
                 let scale = new THREE.Vector3(2, 2, 1);
-                temp.push({ pos, rotation, scale });
+                let initialOpacity = get_random_float(1, 0.85);
+                temp.push({ pos, rotation, scale, initialOpacity });
 
                 if(!allSpawned && distanceCounter <= -distance)
                     allSpawned = true;//end the loop after this set
@@ -120,7 +121,7 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
             START_TRACK.current.position.z += delta * DELTA_SLOW;
             TRANSPORT_TRACK.current.position.z += delta * DELTA_SLOW;
 
-            
+
         }
     });
 
@@ -128,13 +129,13 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
         <>
             <group ref={START_TRACK} position={new THREE.Vector3(0, 0, FURTHEST_Z_INITIAL_VALUE)}>
             { spawnClouds.map((cloud, index) => (
-                <ImagePlane key={`track1-cloud-${index}`} position={cloud.pos} opacity={1} />
+                <CloudRender key={`track1-cloud-${index}`} position={cloud.pos} opacity={cloud.initialOpacity} />
             ))}
             </group>
 
             { backtrackPlacement != -1 && <group ref={TRANSPORT_TRACK} position={new THREE.Vector3(0, 0, backtrackPlacement)}>
                 {spawnClouds.map((cloud, index) => (
-                    <ImagePlane key={`track2-cloud-${index}`} position={cloud.pos} opacity={1} />
+                    <CloudRender key={`track2-cloud-${index}`} position={cloud.pos} opacity={cloud.initialOpacity} />
                 ))}
             </group> }
         </>
@@ -163,7 +164,7 @@ const Ss5: React.FC<Ss5Props> = ({ desktopImplementation }) => {
                 <ambientLight intensity={0.8} />
                 <pointLight position={[10, 10, 10]} />
 
-                <Clouds distance={2} CAMERA={CAMERA} />
+                <Clouds distance={5} CAMERA={CAMERA} />
             </Canvas>
         </div>
     );
