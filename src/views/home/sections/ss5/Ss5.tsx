@@ -1,7 +1,7 @@
 import './ss5.scss';
 import { useLoader, Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import React, { useRef, useMemo, RefObject, useState } from 'react';
+import React, { useRef, useEffect, RefObject, useState } from 'react';
 import get_random_float from '../../../../assets/scripts/get_random_float';
 
 interface IPProps {
@@ -66,54 +66,43 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
         return clutterCount === 0? getRangeValue(ZGAP) : 0;
     }
 
-    const SPAWN_COUNT = useRef<number>(0);
     const [backtrackPlacement, setBacktrackPlacement] = useState<number>(-1);
+    const cloudMapping = useRef<any[]>([]);
 
-    const spawnClouds = useMemo(() => {
-        const temp: any[] = [];
+    useEffect(() => {
+        if(backtrackPlacement === -1){
+            cloudMapping.current = [];
+            FURTHEST_Z.current = FURTHEST_Z_INITIAL_VALUE;
 
-        switch(SPAWN_COUNT.current){
-            case 0:
-                FURTHEST_Z.current = FURTHEST_Z_INITIAL_VALUE;
-                break;
-            case 2:
-                SPAWN_COUNT.current = 0;
-                FURTHEST_Z.current = FURTHEST_Z_INITIAL_VALUE;
-                setBacktrackPlacement(-1);
-                break;
-        }
+            let allSpawned = false;
+            for(let distanceCounter = 0; !allSpawned;){
+                let spawnCloud = (xlevel: number) => {
+                    let displacement = getZSpawnDisplacement();
+                    FURTHEST_Z.current -= displacement;
+                    distanceCounter -= displacement;
 
-        let allSpawned = false;
-        for(let distanceCounter = 0; !allSpawned;){
-            let spawnCloud = (xlevel: number) => {
-                let displacement = getZSpawnDisplacement();
-                FURTHEST_Z.current -= displacement;
-                distanceCounter -= displacement;
+                    let pos = new THREE.Vector3(xlevel * XDISPERSION, FLOOR_LEVEL_DISPLACEMENT, distanceCounter);
+                    let rotation = new THREE.Vector3(0, 0, 0);
+                    let scale = new THREE.Vector3(2, 2, 1);
+                    let initialOpacity = get_random_float(1, 0.85);
+                    cloudMapping.current.push({ pos, rotation, scale, initialOpacity });
 
-                let pos = new THREE.Vector3(xlevel * XDISPERSION, FLOOR_LEVEL_DISPLACEMENT, distanceCounter);
-                let rotation = new THREE.Vector3(0, 0, 0);
-                let scale = new THREE.Vector3(2, 2, 1);
-                let initialOpacity = get_random_float(1, 0.85);
-                temp.push({ pos, rotation, scale, initialOpacity });
+                    if(!allSpawned && distanceCounter <= -distance)
+                        allSpawned = true;//end the loop after this set
+                }
 
-                if(!allSpawned && distanceCounter <= -distance)
-                    allSpawned = true;//end the loop after this set
-            }
-
-            let i = 0;
-            spawnCloud(i);
-            while(i++ < Math.floor(XLEVELS_TO_FILL / 2)){
+                let i = 0;
                 spawnCloud(i);
-                spawnCloud(-i);
+                while(i++ < Math.floor(XLEVELS_TO_FILL / 2)){
+                    spawnCloud(i);
+                    spawnCloud(-i);
+                }
             }
-        }
 
-        if(++SPAWN_COUNT.current === 1)
             setBacktrackPlacement(FURTHEST_Z.current);
-
-        return temp;
-    }, [FURTHEST_Z, FURTHEST_Z_INITIAL_VALUE, SPAWN_COUNT, XLEVELS_TO_FILL, XDISPERSION,
-        FLOOR_LEVEL_DISPLACEMENT, setBacktrackPlacement]);
+        }
+    }, [FURTHEST_Z, FURTHEST_Z_INITIAL_VALUE, XLEVELS_TO_FILL, XDISPERSION,
+        FLOOR_LEVEL_DISPLACEMENT, backtrackPlacement]);
 
     const DELTA_SLOW = 0.4;
     useFrame((_: any, delta: any) => {
@@ -128,13 +117,13 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
     return (
         <>
             <group ref={START_TRACK} position={new THREE.Vector3(0, 0, FURTHEST_Z_INITIAL_VALUE)}>
-            { spawnClouds.map((cloud, index) => (
+            { cloudMapping.current.map((cloud, index) => (
                 <CloudRender key={`track1-cloud-${index}`} position={cloud.pos} opacity={cloud.initialOpacity} />
             ))}
             </group>
 
             { backtrackPlacement != -1 && <group ref={TRANSPORT_TRACK} position={new THREE.Vector3(0, 0, backtrackPlacement)}>
-                {spawnClouds.map((cloud, index) => (
+                {cloudMapping.current.map((cloud, index) => (
                     <CloudRender key={`track2-cloud-${index}`} position={cloud.pos} opacity={cloud.initialOpacity} />
                 ))}
             </group> }

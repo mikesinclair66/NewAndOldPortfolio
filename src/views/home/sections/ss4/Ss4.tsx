@@ -57,8 +57,8 @@ const Ss4: React.FC<Ss4Props> = ({ desktopImplementation }) => {
 
                             <div className="ch-container">
                                 <div className={`collapse-hidden${collapseActive == 0 ? '-joking' : ''}`}>
-                                    <p>My favourite framework is Vue, but I enjoy React more. I&#39;m
-                                        gifted with plenty of experience in JavaScript. I spent a lot of my upbringing coding
+                                    <p>I&#39;m best suited for Vue, but I used React to create this app since I enjoy it more.
+                                        I&#39;m gifted with plenty of experience in JavaScript. I spent a lot of my upbringing coding
                                         and designing static websites using only the vanilla languages. Once I had started
                                         on Vue, I began to challenge myself and took on full-stack web apps using a variety of
                                         frameworks.</p>
@@ -104,7 +104,7 @@ const Ss4: React.FC<Ss4Props> = ({ desktopImplementation }) => {
                                 <div className={`collapse-hidden${collapseActive == 2 ? '-joking' : ''}`}>
                                     <p>I&#39;ve had the most experience with Express when it comes to RESTful frameworks. HOWEVER,
                                         I have 11+ years of experience with Java, so my experience with Spring Boot has been
-                                        easy-going.</p>
+                                        easy-going (I used it to create this app).</p>
                                 </div>
 
                                 <div className={`collapse-hidden${collapseActive == 3 ? '-joking' : ''}`}>
@@ -169,9 +169,9 @@ const Ss4: React.FC<Ss4Props> = ({ desktopImplementation }) => {
 
                             <div className="ch-container">
                                 <div className={`collapse-hidden${collapseActive == 5 ? '-joking' : ''}`}>
-                                    <p>Some people say you either have the talent to become an engineer or you don&#39;t.
-                                        Though I disagree, I definitely have it. As a web developer, there lie many tedious
-                                        procedures when it comes to coding up a web app. As a software engineer, I like
+                                    <p>Some people say you have the gift to become an engineer or you don&#39;t.
+                                        Although I disagree, I definitely have it. As a web developer, there lie many tedious
+                                        forks in the road when it comes to coding up a web app. As a software engineer, I like
                                         to identify and eliminate them by creating great software.</p>
                                 </div>
 
