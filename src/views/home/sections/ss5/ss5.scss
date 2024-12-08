@@ -1,10 +1,15 @@
 #ss-5{
-    background-color: #326696;
+    background-image: linear-gradient(to bottom, #2c5276, #3e80be);
+    /*
+    background-image: url('../../../../../public/graphics/clouds_background.jpeg');
+    background-size: cover;
+    */
     font-family: Monospace;
     font-size: 13px;
     text-align: center;
     font-weight: bold;
     text-align: center;
+    height: 80vh;
 }
 
 @media only screen and (min-width: 750px) and (min-height: 500px){

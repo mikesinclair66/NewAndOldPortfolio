@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { Vector3 } from 'three';
-import get_random_float from '../../../../assets/scripts/get_random_float';
+import get_random_float from '../../../../../assets/scripts/get_random_float';
 
 import { Canvas, useFrame } from '@react-three/fiber';
 import CloudSetProps from './CloudSetProps';
 import ImagePlane from './ImagePlane';
-import Measures from './Measures';
+import Measures from '../Measures';
 
 const CloudSet: React.FC<CloudSetProps> = ({ zLvl, addToBase }) => {
     const AMPLITUDE = 1.2, YFREQUENCY = get_random_float(0.4, -0.4);

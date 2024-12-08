@@ -1,6 +1,6 @@
 import { Vector3, BufferGeometry, LineBasicMaterial, Line } from 'three';
 
-import CloudSetProps from './CloudSetProps';
+import CloudSetProps from './clouds/CloudSetProps';
 
 const ZLVL_KEYS: { [key: string]: number } = {
     '4': 0,
