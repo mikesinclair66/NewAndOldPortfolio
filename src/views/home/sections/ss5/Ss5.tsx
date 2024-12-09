@@ -36,13 +36,16 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
      * NEAREST_ZSPAWN should be where the first cloud is loaded (at the start of its opacity transition)
      */
     const NEAREST_Z = 13, NEAREST_ZSPAWN = NEAREST_Z - OPACITY_TRANSITION_OUT, FURTHEST_Z_INITIAL_VALUE = NEAREST_Z;
-    const FURTHEST_Z = useRef<number>(0);
+    const FURTHEST_Z = useRef<number>(0), TRACK_ZDISTANCE = useRef<number>(0);
 
     /* Two tracks:
      * Start track / Ladder transport track
      * Transport track
      */
     const START_TRACK = useRef<THREE.Group>(null), TRANSPORT_TRACK = useRef<THREE.Group>(null);
+    const QUEUE_START_TRACK = useRef<boolean>(true);
+    const [startTrackFlipCount, setStartTrackFlipCount] = useState<number>(0),
+        [transportTrackFlipCount, setTransportTrackFlipCount] = useState<number>(0);
 
     const getRangeValue = (range: number[]) => get_random_float(range[1], range[0])
 
@@ -67,7 +70,7 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
     }
 
     const [backtrackPlacement, setBacktrackPlacement] = useState<number>(-1);
-    const CLOUD_ROWS = useRef<number>(0);
+    const CLOUD_ROWS = useRef<number>(0), CLOUD_ROWS_PASSED = useRef<number>(0);
     const cloudMapping = useRef<any[]>([]);
 
     const [opacityMapping, assignOpacityMapping] = useState<number[]>([]);
@@ -77,26 +80,39 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
         assignOpacityMapping(opacityMapping.map((oldOpacity: number, i: number) => (index === i? opacity : oldOpacity)));
     }
 
+    const cloudIndicesBeingScanned = useRef<number[]>([]), cloudIndicesAlreadyScanned = useRef<boolean[]>([]);
+    const loadCloudIndices = (cloudRowsPassed: number = 0) => {
+        CLOUD_ROWS_PASSED.current = cloudRowsPassed;
+        cloudIndicesBeingScanned.current = [];
+        cloudIndicesAlreadyScanned.current = [];
+
+        let indexAmount = (XLEVELS_TO_FILL * 2 + 1), startIndex = cloudRowsPassed * indexAmount;
+        for(let i = startIndex; i < startIndex + indexAmount; i++){
+            cloudIndicesBeingScanned.current.push(i);
+            cloudIndicesAlreadyScanned.current.push(false);
+        }
+    }
+
     useEffect(() => {
         if(backtrackPlacement === -1){
             cloudMapping.current = [];
             FURTHEST_Z.current = FURTHEST_Z_INITIAL_VALUE;
 
             let allSpawned = false;
-            for(let distanceCounter = 0; !allSpawned;){
+            for(; !allSpawned;){
                 let spawnCloud = (xlevel: number) => {
                     let displacement = getZSpawnDisplacement();
                     FURTHEST_Z.current -= displacement;
-                    distanceCounter -= displacement;
+                    TRACK_ZDISTANCE.current -= displacement;
 
-                    let pos = new THREE.Vector3(xlevel * XDISPERSION, FLOOR_LEVEL_DISPLACEMENT, distanceCounter);
+                    let pos = new THREE.Vector3(xlevel * XDISPERSION, FLOOR_LEVEL_DISPLACEMENT, TRACK_ZDISTANCE.current);
                     let rotation = new THREE.Vector3(0, 0, 0);
                     let scale = new THREE.Vector3(2, 2, 1);
                     let initialOpacity = get_random_float(1, 0.85);
                     cloudMapping.current.push({ pos, rotation, scale, initialOpacity });
                     ++opacityMappingLength.current;
 
-                    if(!allSpawned && distanceCounter <= -distance)
+                    if(!allSpawned && TRACK_ZDISTANCE.current <= -distance)
                         allSpawned = true;//end the loop after this set
                 }
 
@@ -110,6 +126,7 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
                 ++CLOUD_ROWS.current;
             }
 
+            loadCloudIndices();
             setBacktrackPlacement(FURTHEST_Z.current);
             let _opacityMapping: number[] = [];
             for(let i = 0; i < opacityMappingLength.current; i++)
@@ -119,27 +136,50 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
     }, [FURTHEST_Z, FURTHEST_Z_INITIAL_VALUE, XLEVELS_TO_FILL, XDISPERSION,
         FLOOR_LEVEL_DISPLACEMENT, backtrackPlacement]);
 
-    const [cloudRowsPassed, setCloudRowsPassed] = useState<number>(0);
-    const cloudIndicesBeingScanned = useRef<number[]>([]);
-    useEffect(() => {
-        cloudIndicesBeingScanned.current = [];
-        let indexAmount = (XLEVELS_TO_FILL * 2 + 1), startIndex = cloudRowsPassed * indexAmount;
-        for(let i = startIndex; i < startIndex + indexAmount; i++)
-            cloudIndicesBeingScanned.current.push(i);
-    }, [cloudRowsPassed]);
-
     const DELTA_SLOW = 0.4;
     useFrame((_: any, delta: any) => {
         if(START_TRACK.current && TRANSPORT_TRACK.current){
             START_TRACK.current.position.z += delta * DELTA_SLOW;
             TRANSPORT_TRACK.current.position.z += delta * DELTA_SLOW;
 
-            let trackz = START_TRACK.current.position.z;
-            if(CLOUD_ROWS.current !== 0 && trackz >= FURTHEST_Z_INITIAL_VALUE){
-                //setCloudRowsPassed(cloudRowsPassed + 1);
-                for(let index of cloudIndicesBeingScanned.current){
-                    if(trackz + cloudMapping.current[index].pos.z >= FURTHEST_Z_INITIAL_VALUE)
-                        setOpacityMapping(index, 1 - opacityMapping[index]);
+            for(let n = 0; n < cloudIndicesBeingScanned.current.length; n++){
+                let mapIndex = cloudIndicesBeingScanned.current[n];
+                /*
+                console.log(`c[${mapIndex}] { scanned: ${cloudIndicesAlreadyScanned.current[n]},`
+                    + ` z: ${cloudMapping.current[mapIndex].pos.z} }`);
+                    */
+
+                if(!cloudIndicesAlreadyScanned.current[n]){
+                    let trackz = QUEUE_START_TRACK? START_TRACK.current.position.z : TRANSPORT_TRACK.current.position.z;
+
+                    if(trackz + cloudMapping.current[mapIndex].pos.z >= FURTHEST_Z_INITIAL_VALUE){
+                        cloudIndicesAlreadyScanned.current[n] = true;
+                        setOpacityMapping(mapIndex, 1 - opacityMapping[mapIndex]);
+                        console.log('opacity flipped! at row ' + CLOUD_ROWS_PASSED.current);
+                    }
+                }
+            }
+
+            let allTestsPassed = true;
+            for(let bool of cloudIndicesAlreadyScanned.current)
+                if(!bool){
+                    allTestsPassed = false;
+                    break;
+                }
+
+            if(allTestsPassed){
+                if(CLOUD_ROWS_PASSED.current + 1 < CLOUD_ROWS.current){
+                    console.log('onto row ' + (CLOUD_ROWS_PASSED.current + 1));
+                    loadCloudIndices(CLOUD_ROWS_PASSED.current + 1);
+                } else {
+                    loadCloudIndices();
+                    if(QUEUE_START_TRACK.current)
+                        setStartTrackFlipCount(startTrackFlipCount + 1);
+                    else
+                        setTransportTrackFlipCount(transportTrackFlipCount + 1);
+                    QUEUE_START_TRACK.current = !QUEUE_START_TRACK.current;
+                    console.log('restarting! {startTrackCount: ' + startTrackFlipCount
+                        + ', transportTrackCount: ' + transportTrackFlipCount + '}');
                 }
             }
         }
@@ -147,17 +187,19 @@ const Clouds: React.FC<CProps> = ({ distance, CAMERA }) => {
 
     return (
         <>
-            <group ref={START_TRACK} position={new THREE.Vector3(0, 0, FURTHEST_Z_INITIAL_VALUE)}>
+            <group ref={START_TRACK} position={new THREE.Vector3(0, 0, FURTHEST_Z_INITIAL_VALUE
+                + TRACK_ZDISTANCE.current * startTrackFlipCount * 2)}>
             { cloudMapping.current.map((cloud, index) => (
                 <CloudRender key={`track1-cloud-${index}`} position={cloud.pos}
-                opacity={cloud.initialOpacity * opacityMapping.current[index]} />
+                opacity={cloud.initialOpacity * opacityMapping[index]} />
             ))}
             </group>
 
-            { backtrackPlacement != -1 && <group ref={TRANSPORT_TRACK} position={new THREE.Vector3(0, 0, backtrackPlacement)}>
+            { backtrackPlacement != -1 && <group ref={TRANSPORT_TRACK} position={new THREE.Vector3(0, 0,
+            backtrackPlacement + TRACK_ZDISTANCE.current * transportTrackFlipCount)}>
                 {cloudMapping.current.map((cloud, index) => (
                     <CloudRender key={`track2-cloud-${index}`} position={cloud.pos}
-                    opacity={cloud.initialOpacity * (1 - opacityMapping.current[index])} />
+                    opacity={cloud.initialOpacity * (1 - opacityMapping[index])} />
                 ))}
             </group> }
         </>
