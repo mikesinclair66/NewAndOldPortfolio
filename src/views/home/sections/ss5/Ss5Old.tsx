@@ -1,153 +1,277 @@
 import './ss5.scss';
+import { useLoader, Canvas, useFrame, RootState } from "@react-three/fiber";
+import * as THREE from "three";
+import React, { useRef, useEffect, RefObject, useState } from 'react';
 import get_random_float from '../../../../assets/scripts/get_random_float';
 
-import React, { useState, useEffect, useRef } from 'react';
-// import { PerspectiveCamera, TextureLoader, Vector3 } from 'three';
-// import { Canvas, useThree, useLoader } from '@react-three/fiber';
-import { TextureLoader, Vector3 } from 'three';
-import { Canvas, useLoader } from '@react-three/fiber';
-
 interface IPProps {
-    position: Vector3;
+    position: THREE.Vector3;
+    opacity: number;
 }
 
-const ImagePlane: React.FC<IPProps> = ({ position }) => {
-    const texture = useLoader(TextureLoader, '/graphics/cloud.png');
+const CloudRender: React.FC<IPProps> = ({ position, opacity }) => {
+    const material = new THREE.SpriteMaterial({
+        map: useLoader(THREE.TextureLoader, '/graphics/cloud.png'),
+        transparent: true,
+        opacity: opacity, //get_random_float(1, 0.4),
+        depthWrite: false,
+        color: "#f0f0f0"
+    });
   
     return (
-        <mesh position={position}>
-            <planeGeometry args={[5, 5]} /> {/* Adjust size */}
-            <meshBasicMaterial map={texture} transparent={true} />
-        </mesh>
+        <sprite position={position} scale={[2, 2, 1]} material={material} />
     );
 };
 
-/*
-interface CUProps {
-    width: number;
-    height: number;
+interface CProps {
+    desktopImplementation: boolean;
+    distance: number;
+    MOVING_Z: RefObject<number>;
 }
 
-const CameraUpdater: React.FC<CUProps> = ({ width, height }) => {
-    const { camera, gl } = useThree();
-    const perspective = camera as PerspectiveCamera;
+const Clouds: React.FC<CProps> = ({ desktopImplementation, distance, MOVING_Z }) => {
+    const OPACITY_TRANSITION_IN = .35, OPACITY_TRANSITION_OUT = .1;
+
+    /* Start/End spawn points:
+     * NEAREST_Z should be where the first cloud is loaded from the start track (at the end of its opacity transition)
+     * NEAREST_ZSPAWN should be where the first cloud is loaded (at the start of its opacity transition)
+     */
+    /*
+    const NEAREST_Z = 15, NEAREST_ZSPAWN = NEAREST_Z - OPACITY_TRANSITION_OUT, FURTHEST_Z_INITIAL_VALUE = NEAREST_Z;
+    const FURTHEST_Z = useRef<number>(0), TRACK_ZDISTANCE = useRef<number>(0);
+    */
+    const TRACK_ZLENGTH = useRef<number>(0);
+    const [zlengthRecord, setZlengthRecord] = useState<number>(-1);
+
+    /* Two tracks:
+     * Start track / Ladder transport track
+     * Transport track
+     */
+    const START_TRACK = useRef<THREE.Group>(null), TRANSPORT_TRACK = useRef<THREE.Group>(null);
+    const QUEUE_START_TRACK = useRef<boolean>(true);
+    const [startTrackFlipCount, setStartTrackFlipCount] = useState<number>(0),
+        [transportTrackFlipCount, setTransportTrackFlipCount] = useState<number>(0);
+
+    const getRangeValue = (range: number[]) => get_random_float(range[1], range[0])
+
+    //operations of x
+    const XLEVELS_TO_FILL = useRef<number>(5); //Should be odd
+    const XDISPERSION = 1.8;
+
+    //operations of y
+    const FLOOR_LEVEL_DISPLACEMENT = useRef<number>(desktopImplementation? -1.5 : 0);
 
     useEffect(() => {
-        const handleResize = () => {
-            // Update the camera's aspect ratio and projection matrix
-            if(camera instanceof PerspectiveCamera){
-                perspective.aspect = width / height;
-                camera.updateProjectionMatrix();
+        if(desktopImplementation){
+            XLEVELS_TO_FILL.current = 5;
+            FLOOR_LEVEL_DISPLACEMENT.current = -1.5;
+        } else {
+            XLEVELS_TO_FILL.current = 5;
+            FLOOR_LEVEL_DISPLACEMENT.current = 0;
+        }
+    }, [desktopImplementation]);
+
+    //operations of z
+    const ZGAP = [.175, .45], ZCLUTTER = [2, 3];
+    let clutterCount = 0, clutterSet = Math.floor(getRangeValue(ZCLUTTER));
+
+    const getZSpawnDisplacement = () => {
+        if(clutterCount++ === clutterSet){
+            clutterSet = Math.floor(getRangeValue(ZCLUTTER));
+            clutterCount = 0;
+        }
+
+        return clutterCount === 0? getRangeValue(ZGAP) : 0;
+    }
+
+    //const [backtrackPlacement, setBacktrackPlacement] = useState<number>(-1);
+    const CLOUD_ROWS = useRef<number>(0), CLOUD_ROWS_PASSED = useRef<number>(0);
+    const cloudMapping = useRef<any[]>([]);
+
+    const [opacityMapping, assignOpacityMapping] = useState<number[]>([]);
+    const opacityMappingLength = useRef<number>(0);
+
+    const setOpacityMapping = (index: number, opacity: number) => {
+        assignOpacityMapping(opacityMapping.map((oldOpacity: number, i: number) => (index === i? opacity : oldOpacity)));
+    }
+
+    const cloudIndicesBeingScanned = useRef<number[]>([]), cloudIndicesAlreadyScanned = useRef<boolean[]>([]);
+    const cloudIndicesDebug = useRef<string>("");
+    const logCloudIndicesDebug = useRef<(indices: boolean[]) => void>((indices: boolean[]) => {});
+
+    const loadCloudIndices = (cloudRowsPassed: number = 0) => {
+        console.log(`loading cloud indices for row ${cloudRowsPassed} out of ${CLOUD_ROWS.current}`);
+        CLOUD_ROWS_PASSED.current = cloudRowsPassed;
+        cloudIndicesBeingScanned.current = [];
+        cloudIndicesAlreadyScanned.current = [];
+        cloudIndicesDebug.current = "[";
+
+        let indexAmount = (XLEVELS_TO_FILL.current * 2 + 1), startIndex = cloudRowsPassed * indexAmount;
+        for(let i = startIndex; i < startIndex + indexAmount; i++){
+            cloudIndicesBeingScanned.current.push(i);
+            cloudIndicesAlreadyScanned.current.push(false);
+        }
+
+        //debug
+        for(let i = 0; i < startIndex; i++)
+            cloudIndicesDebug.current += `${i}, `;
+        for(let i = startIndex + indexAmount; i < cloudMapping.current.length; i++)
+            cloudIndicesDebug.current += `${i}, `;
+        cloudIndicesDebug.current += '...\n';
+
+        logCloudIndicesDebug.current = (values: boolean[]) => {
+            let str = cloudIndicesDebug.current;
+            for(let i = startIndex; i < startIndex + indexAmount; i++)
+                str += `${i}) ${values[i]? 'T' : 'F'}\n`;
+            str += "]";
+            console.log(str);
+        }
+    }
+
+    useEffect(() => {
+        if(zlengthRecord === -1){
+            cloudMapping.current = [];
+
+            let distanceMet = false;
+            for(; !distanceMet;){
+                let spawnCloud = (xlevel: number) => {
+                    TRACK_ZLENGTH.current -= getZSpawnDisplacement();
+                    let pos = new THREE.Vector3(xlevel * XDISPERSION, FLOOR_LEVEL_DISPLACEMENT.current, TRACK_ZLENGTH.current);
+                    let rotation = new THREE.Vector3(0, 0, 0);
+                    let scale = new THREE.Vector3(2, 2, 1);
+                    let initialOpacity = get_random_float(1, 0.85);
+                    cloudMapping.current.push({ pos, rotation, scale, initialOpacity });
+
+                    ++opacityMappingLength.current;
+                    if(!distanceMet && TRACK_ZLENGTH.current <= -distance)
+                        distanceMet = true;//end the loop after this set
+                }
+
+                let i = 0;
+                spawnCloud(i);
+                while(i++ < Math.floor(XLEVELS_TO_FILL.current / 2)){
+                    spawnCloud(i);
+                    spawnCloud(-i);
+                }
+
+                console.log(`${i * 2 + 1} clouds added on row ${CLOUD_ROWS.current}`);
+                ++CLOUD_ROWS.current;
             }
 
-            // Resize the WebGL canvas
-            gl.setSize(width, height);
-        };
+            loadCloudIndices();
+            setZlengthRecord(TRACK_ZLENGTH.current);
 
-        handleResize();
-        window.addEventListener('resize', handleResize);
+            let _opacityMapping: number[] = [];
+            for(let i = 0; i < cloudMapping.current.length; i++)
+                _opacityMapping.push(1);
+            assignOpacityMapping(_opacityMapping);
+        }
+    }, [zlengthRecord]);
 
-        return () => window.removeEventListener('resize', handleResize);
-    }, [camera, gl]);
+    const DEBUG = useRef<boolean>(true);
+    useFrame(() => {
+        //console.log(`MOVING_Z: ${MOVING_Z.current}`);
+        let allCloudsFlipped = true;
+        for(let bool of cloudIndicesAlreadyScanned.current)
+            if(!bool){
+                allCloudsFlipped = false;
+                break;
+            }
+
+        if(DEBUG.current)
+            logCloudIndicesDebug.current(cloudIndicesAlreadyScanned.current);
+
+        //move to next level once all clouds are flipped
+        if(allCloudsFlipped){
+            if(CLOUD_ROWS_PASSED.current + 1 < CLOUD_ROWS.current){
+                //console.log('onto row ' + (CLOUD_ROWS_PASSED.current + 1));
+                loadCloudIndices(CLOUD_ROWS_PASSED.current + 1);
+            } else {
+                if(QUEUE_START_TRACK.current)
+                    setStartTrackFlipCount(startTrackFlipCount + 1);
+                else
+                    setTransportTrackFlipCount(transportTrackFlipCount + 1);
+                QUEUE_START_TRACK.current = !QUEUE_START_TRACK.current;
+
+                loadCloudIndices();
+                DEBUG.current = false;
+                /*
+                console.log('restarting! {startTrackCount: ' + startTrackFlipCount
+                    + ', transportTrackCount: ' + transportTrackFlipCount + '}');
+                    */
+            }
+        }
+
+        //check for opacity flip
+        for(let n = 0; n < cloudIndicesBeingScanned.current.length; n++){
+            let mapIndex = cloudIndicesBeingScanned.current[n];
+
+            if(!cloudIndicesAlreadyScanned.current[n] && MOVING_Z.current
+            && MOVING_Z.current <= cloudMapping.current[mapIndex].pos.z){
+                cloudIndicesAlreadyScanned.current[n] = true;
+                setOpacityMapping(mapIndex, 1 - opacityMapping[mapIndex]);
+                //console.log('opacity flipped! at index ' + mapIndex);
+            }
+        }
+    });
+
+    return (
+        <>
+            <group ref={START_TRACK} position={new THREE.Vector3(0, 0, zlengthRecord * startTrackFlipCount * 2)}>
+            { cloudMapping.current.map((cloud, index) => (
+                <CloudRender key={`track1-cloud-${index}`} position={cloud.pos}
+                opacity={cloud.initialOpacity * opacityMapping[index]} />
+            ))}
+            </group>
+
+            { zlengthRecord != -1 && <group ref={TRANSPORT_TRACK} position={new THREE.Vector3(0, 0,
+            zlengthRecord + zlengthRecord * transportTrackFlipCount)}>
+                {cloudMapping.current.map((cloud, index) => (
+                    <CloudRender key={`track2-cloud-${index}`} position={cloud.pos}
+                    opacity={cloud.initialOpacity * (1 - opacityMapping[index])} />
+                ))}
+            </group> }
+        </>
+    )
+}
+
+interface MovingCameraProp {
+    setZ: (val: number) => void;
+}
+const MovingCamera: React.FC<MovingCameraProp> = ({ setZ }) => {
+    const DELTA_SLOW = 0.16;
+    useFrame((state: RootState, delta: number) => {
+        state.camera.position.z -= delta * DELTA_SLOW;
+        setZ(state.camera.position.z);
+    });
 
     return null;
 }
-    */
 
 interface Ss5Props {
     desktopImplementation: boolean;
 }
 
 const Ss5: React.FC<Ss5Props> = ({ desktopImplementation }) => {
-    /* The following clouds implementation takes direct inspiration from Clouds by Mr Doobs. However,
-    it uses all my own code.
-    https://mrdoob.com/lab/javascript/webgl/clouds/ */
-
-    const ss5 = useRef<HTMLDivElement>(null);
-
-    const X_RANGE = [-2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0,
-        0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-    const Z_RANGE = [0, 2];
-    const [allCoords, setAllCoords] = useState<Vector3[]>([]);
-
-    
-    /*
-    function getDistinctZCoord(approximateZLevel: number): number {
-        let zApprox = get_random_float(approximateZLevel + Z_APPROXIMATE_PLANE, approximateZLevel - Z_APPROXIMATE_PLANE);
-        return zApprox;
-    }
-        */
-
-    const X_APPROXIMATE_PLANE = 0.2, Z_APPROXIMATE_PLANE = 0.3;
-    function getApproximateCoord(coord: number, approximatePlane: number){
-        return get_random_float(coord + approximatePlane, coord - approximatePlane);
-    }
-
-    const [prevCursorCoords, setPrevCursorCoords] = useState<number[]>([0, 0]);
-
-    //create the clouds
-    useEffect(() => {
-        let steps = 0;
-        for(let i = Z_RANGE[0]; i <= Z_RANGE[1]; i++)
-            ++steps;
-
-        let coords: Vector3[] = [];
-        for(let i = 0; i <= steps; i++){
-            //each cloud is approximately the desired Z level [Z_RANGE[0], Z_RANGE[0] + 1, ...Z_RANGE[1]]
-            for(let xcoord of X_RANGE)
-                coords.push(new Vector3(getApproximateCoord(xcoord, X_APPROXIMATE_PLANE), -2,
-                    getApproximateCoord(Z_RANGE[0] + i, Z_APPROXIMATE_PLANE)));
-        }
-        setAllCoords(coords);
-
-        if(ss5.current)
-            setPrevCursorCoords([ss5.current.offsetWidth / 2, ss5.current.offsetHeight]);
-    }, []);
-
-    const TRANSITION_TIME = 2000; //ms
-    const TRANSITION_INTERVAL = 50;
-    const TRANSITION_MAX = TRANSITION_TIME / TRANSITION_INTERVAL;
-    const [locationExtendCoords, setLocationExtendCoords] = useState<number[]>([0, 0]);
-    const [cursorCoords, setCursorCoords] = useState<number[]>([0, 0]);
-
-    /*
-    useEffect(() => {
-        let transitionCount = 0;
-        let transition = window.setInterval(() => {
-            if(ss5.current){
-                let timeRatio = Math.min(transitionCount / TRANSITION_MAX, 1);
-                let easeOut = (t: number, distance: number) => { return (1 - Math.pow(1 - t, 3)) * distance; }
-                setCursorCoords([prevCursorCoords[0] + easeOut(timeRatio, locationExtendCoords[0]),
-                    locationExtendCoords[1] + easeOut(timeRatio, locationExtendCoords[1])]);
-            }
-
-            if(transitionCount++ * TRANSITION_INTERVAL >= TRANSITION_TIME)
-                window.clearInterval(transition);
-        }, TRANSITION_INTERVAL);
-    }, [locationExtendCoords, prevCursorCoords, TRANSITION_MAX, TRANSITION_INTERVAL, TRANSITION_TIME]);
-    */
-
-    function locateCursorCoords(ev: React.MouseEvent<HTMLDivElement, MouseEvent>){
-        const { clientX, clientY } = ev;
-        if(ss5.current)
-            // setLocationExtendCoords([(clientX - (ss5.current.offsetWidth / 2)) * 0.000095,
-            // ((ss5.current.offsetHeight / 2) - clientY) * 0.000095]);
-            {}
-    }
+    const SS5 = useRef<HTMLDivElement>(null);
+    const MOVING_Z = useRef<number>(0);
+    const setZ = (val: number) => { MOVING_Z.current = val; }
 
     return (
-        <div id="ss-5" className="scroll-section fill-vh" ref={ss5} onMouseMove={locateCursorCoords}>
-            <Canvas>
-                <ambientLight intensity={0.5} />
-                {/* <CameraUpdater width={sectionDimensions[0]} height={sectionDimensions[1]} /> */}
-                
-{/* 
-                { allCoords.map((xyz, index) => (
-                    <ImagePlane position={new Vector3(xyz.x + cursorCoords[0], xyz.y + cursorCoords[1], xyz.z)}
-                    key={`cloud-${index}`}></ImagePlane>
-                )) }
-                 */}
-                 <ImagePlane position={new Vector3(7, 3, 0)} />
+        <div id="ss-5" className="scroll-section" ref={SS5}>
+            {/* <Clouds ss5={ss5} /> */}
+            <Canvas camera={{ position: [0, 0, 0], fov: 75 }} onCreated={({ scene }) => {
+                // Color, near, far
+                //scene.fog = new THREE.Fog(0xaaaaaa, 5, 15);//linear fog
+
+                // Color, density
+                scene.fog = new THREE.FogExp2(0xaaaaaa, 0.05);//exponential fog
+            }}>
+                <MovingCamera setZ={setZ} />
+                <ambientLight intensity={0.8} />
+                <pointLight position={[10, 10, 10]} />
+
+                <Clouds desktopImplementation={desktopImplementation} distance={5} MOVING_Z={MOVING_Z} />
             </Canvas>
         </div>
     );
