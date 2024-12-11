@@ -30,11 +30,10 @@ interface CProps {
     desktopImplementation: boolean;
 }
 const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplementation }) => {
-    const OPACITY_TRANSITION_IN = .35, OPACITY_TRANSITION_OUT = .1;
+    const OPACITY_TRANSITION_IN = .2, OPACITY_TRANSITION_OUT = .1;
+    const ZSIGHT_MODERATOR = -2;
 
-    const TRACK_ZLENGTH = useRef<number>(0);
     const [zlengthRecord, setZlengthRecord] = useState<number>(-1);
-    const [zsightModerator, setZsightModerator] = useState<number>(-2);
 
     const XDISPERSION = 1.8;
 
@@ -46,18 +45,23 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
     const ZGAP = [.225, .45], ZCLUTTER = [2, 3];
     let clutterCount = 0, clutterSetAmount = Math.floor(getRangeValue(ZCLUTTER));
 
-    //each of the four sets of variables below are referring to the clutter sets, not the individual clouds
     const CLUTTER_SETS = useRef<number[][]>([[]]);
-    const CLOUD_RECORD_ITERATIONS = useRef<number[]>([0]);
-    const CLOUD_RANGE_OPACITIES = useRef<number[]>([1]);
-    const CLOUDS_TRANSITIONING_IN = useRef<number[]>([-1]);
+    const CLUTTER_SET_ITERATIONS = useRef<number[]>([0]);
+    const CLUTTER_SET_DISTANCE_OPACITIES = useRef<number[]>([1]);
 
     const [clutterSets, setClutterSets] = useState<number[][]>([]);
-    const [cloudRecordIterations, setCloudRecordIterations] = useState<number[]>([]);
+    const [clutterSetIterations, setClutterSetIterations] = useState<number[]>([]);
 
     //opacity variables
-    const [cloudRangeOpacities, setCloudRangeOpacities] = useState<number[]>([]);
-    const [cloudsTransitioningIn, setCloudsTransitioningIn] = useState<number[]>([]);
+    const [clutterSetDistanceOpacities, setClutterSetDistanceOpacities] = useState<number[]>([]);
+    const [clutterSetsTransitioningIn, setClutterSetsTransitioningIn] = useState<number[]>([]);
+    const [transitionInOpacities, setTransitionInOpacities] = useState<number[]>([]);
+
+    const setClutterSetDistanceOpacity = (value: number, index: number) => {
+        setClutterSetDistanceOpacities(clutterSetDistanceOpacities.map((opacity: number, opacityIndex: number) => (opacityIndex
+            === index? value : opacity)));
+    }
+
     const getZSpawnDisplacement = (cloudIndex: number, currentZlength: number) => {
         if(CLUTTER_SETS.current)
             CLUTTER_SETS.current[CLUTTER_SETS.current.length - 1].push(cloudIndex);
@@ -70,9 +74,8 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
             displacement = getRangeValue(ZGAP);
             if(CLUTTER_SETS.current && (currentZlength - displacement) > -distance){
                 CLUTTER_SETS.current.push([]);
-                CLOUD_RECORD_ITERATIONS.current.push(0);
-                CLOUD_RANGE_OPACITIES.current.push(1);
-                CLOUDS_TRANSITIONING_IN.current.push(-1);
+                CLUTTER_SET_ITERATIONS.current.push(0);
+                CLUTTER_SET_DISTANCE_OPACITIES.current.push(1);
             }
         }
 
@@ -108,57 +111,68 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
         setCloudXYZs(temp);
 
         setClutterSets(CLUTTER_SETS.current);
-        setCloudRecordIterations(CLOUD_RECORD_ITERATIONS.current);
-        setCloudRangeOpacities(CLOUD_RANGE_OPACITIES.current);
-        setCloudsTransitioningIn(CLOUDS_TRANSITIONING_IN.current);
+        setClutterSetIterations(CLUTTER_SET_ITERATIONS.current);
+        setClutterSetDistanceOpacities(CLUTTER_SET_DISTANCE_OPACITIES.current);
     }, []);
 
-    const CLUTTER_SET = useRef<number>(0), PREV_CLUTTER_SET = useRef<number>(0);
+    const CLUTTER_SET = useRef<number>(0);//, PREV_CLUTTER_SET = useRef<number>(0);
     useFrame(() => {
         if(cloudXYZs.length > 0){
-            //since every cloud within a clutter set must have the same z, grab the first one we find
-            let distanceToEnd: number = movingZ + cloudXYZs[clutterSets[CLUTTER_SET.current][0]][2]
-                + cloudRecordIterations[CLUTTER_SET.current] * zlengthRecord;
+            //clouds transitioning in
+            let stillIncluded: { [key: string]: number[] } = {
+                clutterSetsTransitioningIn: [],
+                transitionInOpacities: []
+            };
+            for(let i = 0; i < transitionInOpacities.length; i++){
+                let opacityRatio = (movingZ - transitionInOpacities[i]) / OPACITY_TRANSITION_IN;
+                setClutterSetDistanceOpacity(opacityRatio, clutterSetsTransitioningIn[i]);
 
-            if(distanceToEnd >= 0){
-                setCloudRecordIterations(cloudRecordIterations.map(
-                (recordIteration: number, index: number) => recordIteration + (index === CLUTTER_SET.current? 1 : 0)));
-                
-                if(CLUTTER_SET.current + 1 >= clutterSets.length){
-                    PREV_CLUTTER_SET.current = CLUTTER_SET.current;
-                    CLUTTER_SET.current = 0;
-                } else
-                    PREV_CLUTTER_SET.current = CLUTTER_SET.current++;
-
-                setCloudsTransitioningIn(cloudsTransitioningIn.map((weakSignalOpacity: number,
-                    index: number) => (index === PREV_CLUTTER_SET.current? movingZ : weakSignalOpacity)));
-            } else if(distanceToEnd + OPACITY_TRANSITION_OUT >= 0)
-                setCloudRangeOpacities(cloudRangeOpacities.map((opacity: number, index: number) => (index
-                    === CLUTTER_SET.current? (-1 * (distanceToEnd / OPACITY_TRANSITION_OUT)) : opacity)));
-
-            if(cloudsTransitioningIn[PREV_CLUTTER_SET.current] != -1){
-                let opacityTransitioned = ((movingZ - cloudsTransitioningIn[PREV_CLUTTER_SET.current]) / OPACITY_TRANSITION_IN);
-                setCloudRangeOpacities(cloudRangeOpacities.map((opacity: number, index: number) => (index
-                    === PREV_CLUTTER_SET.current? opacityTransitioned : opacity)));
-
-                if(opacityTransitioned >= 1){
-                    setCloudsTransitioningIn(cloudsTransitioningIn.map((weakSignalOpacity: number,
-                        index: number) => (index === PREV_CLUTTER_SET.current? -1 : weakSignalOpacity)));
-                    setCloudRangeOpacities(cloudRangeOpacities.map((opacity: number,
-                        index: number) => index === PREV_CLUTTER_SET.current? 1 : opacity));
+                if(opacityRatio < 1){
+                    stillIncluded.clutterSetsTransitioningIn.push(clutterSetsTransitioningIn[i]);
+                    stillIncluded.transitionInOpacities.push(transitionInOpacities[i]);
                 }
             }
+            setClutterSetsTransitioningIn(stillIncluded.clutterSetsTransitioningIn);
+            setTransitionInOpacities(stillIncluded.transitionInOpacities);
+
+            //since every cloud within a clutter set must have the same z, grab the first one we find
+            let distanceToEnd: number = movingZ + cloudXYZs[clutterSets[CLUTTER_SET.current][0]][2]
+                + clutterSetIterations[CLUTTER_SET.current] * zlengthRecord;
+
+            //clouds transitioning out
+            if(distanceToEnd >= 0){
+                setClutterSetIterations(clutterSetIterations.map(
+                (recordIteration: number, index: number) => recordIteration + (index === CLUTTER_SET.current? 1 : 0)));
+                
+                setClutterSetsTransitioningIn([...clutterSetsTransitioningIn, CLUTTER_SET.current]);
+                setTransitionInOpacities([...transitionInOpacities, movingZ]);
+                if(++CLUTTER_SET.current >= clutterSets.length)
+                    CLUTTER_SET.current = 0;
+            } else if(distanceToEnd + OPACITY_TRANSITION_OUT >= 0)
+                setClutterSetDistanceOpacity(-1 * (distanceToEnd / OPACITY_TRANSITION_OUT), CLUTTER_SET.current);
         }
     });
+
+    useEffect(() => {
+        debug_dict({
+            clutterSetsTransitioningIn: clutterSetsTransitioningIn
+        }, true);
+    }, [clutterSetsTransitioningIn]);
+
+    useEffect(() => {
+        debug_dict({
+            setTransitionInOpacities: setTransitionInOpacities
+        }, true);
+    }, [setTransitionInOpacities]);
 
     return (
         <>
             { clutterSets.map((clutterSet: number[], clutterSetIndex: number) => (
-                <group>
+                <group key={`cloud-group-${clutterSetIndex}`}>
                     { clutterSet.map((cloudIndex: number, indexWithinClutterSet: number) => (
                         <CloudRender position={new THREE.Vector3(cloudXYZs[cloudIndex][0], cloudXYZs[cloudIndex][1],
-                        cloudXYZs[cloudIndex][2] + zlengthRecord * cloudRecordIterations[clutterSetIndex] - zsightModerator)}
-                        key={`cloud-${cloudIndex}`} opacity={cloudRangeOpacities[clutterSetIndex]} />
+                        cloudXYZs[cloudIndex][2] + zlengthRecord * clutterSetIterations[clutterSetIndex] - ZSIGHT_MODERATOR)}
+                        key={`cloud-${cloudIndex}`} opacity={clutterSetDistanceOpacities[clutterSetIndex]} />
                     )) }
                 </group>
             )) }
