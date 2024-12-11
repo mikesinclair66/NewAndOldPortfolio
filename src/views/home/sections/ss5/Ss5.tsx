@@ -55,7 +55,7 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
     //opacity variables
     const [clutterSetDistanceOpacities, setClutterSetDistanceOpacities] = useState<number[]>([]);
     const [clutterSetsTransitioningIn, setClutterSetsTransitioningIn] = useState<number[]>([]);
-    const [transitionInOpacities, setTransitionInOpacities] = useState<number[]>([]);
+    const [spawnTimeRecords, setSpawnTimeRecords] = useState<number[]>([]);
 
     const setClutterSetDistanceOpacity = (value: number, index: number) => {
         setClutterSetDistanceOpacities(clutterSetDistanceOpacities.map((opacity: number, opacityIndex: number) => (opacityIndex
@@ -121,19 +121,19 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
             //clouds transitioning in
             let stillIncluded: { [key: string]: number[] } = {
                 clutterSetsTransitioningIn: [],
-                transitionInOpacities: []
+                spawnTimeRecords: []
             };
-            for(let i = 0; i < transitionInOpacities.length; i++){
-                let opacityRatio = (movingZ - transitionInOpacities[i]) / OPACITY_TRANSITION_IN;
+            for(let i = 0; i < clutterSetsTransitioningIn.length; i++){
+                let opacityRatio = (movingZ - spawnTimeRecords[i]) / OPACITY_TRANSITION_IN;
                 setClutterSetDistanceOpacity(opacityRatio, clutterSetsTransitioningIn[i]);
 
                 if(opacityRatio < 1){
                     stillIncluded.clutterSetsTransitioningIn.push(clutterSetsTransitioningIn[i]);
-                    stillIncluded.transitionInOpacities.push(transitionInOpacities[i]);
+                    stillIncluded.spawnTimeRecords.push(spawnTimeRecords[i]);
                 }
             }
             setClutterSetsTransitioningIn(stillIncluded.clutterSetsTransitioningIn);
-            setTransitionInOpacities(stillIncluded.transitionInOpacities);
+            setSpawnTimeRecords(stillIncluded.spawnTimeRecords);
 
             //since every cloud within a clutter set must have the same z, grab the first one we find
             let distanceToEnd: number = movingZ + cloudXYZs[clutterSets[CLUTTER_SET.current][0]][2]
@@ -141,11 +141,14 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
 
             //clouds transitioning out
             if(distanceToEnd >= 0){
+                setClutterSetDistanceOpacity(0, CLUTTER_SET.current);
                 setClutterSetIterations(clutterSetIterations.map(
                 (recordIteration: number, index: number) => recordIteration + (index === CLUTTER_SET.current? 1 : 0)));
-                
+
+                //record time of clouds transitioning in
                 setClutterSetsTransitioningIn([...clutterSetsTransitioningIn, CLUTTER_SET.current]);
-                setTransitionInOpacities([...transitionInOpacities, movingZ]);
+                setSpawnTimeRecords([...spawnTimeRecords, movingZ]);
+
                 if(++CLUTTER_SET.current >= clutterSets.length)
                     CLUTTER_SET.current = 0;
             } else if(distanceToEnd + OPACITY_TRANSITION_OUT >= 0)
@@ -161,9 +164,9 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
 
     useEffect(() => {
         debug_dict({
-            setTransitionInOpacities: setTransitionInOpacities
+            spawnTimeRecords: spawnTimeRecords
         }, true);
-    }, [setTransitionInOpacities]);
+    }, [spawnTimeRecords]);
 
     return (
         <>
