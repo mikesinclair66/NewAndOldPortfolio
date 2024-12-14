@@ -56,7 +56,7 @@ const Ss2: React.FC<Ss2Props> = ({ desktopImplementation }) => {
                         hoverSrc="/graphics/media/iti.png" alt="Company Website"
                         desktopImplementation={desktopImplementation} />
                     </a>
-                    <a href="https://github.com/mikesinclair66" target="_blank">
+                    <a href="https://github.com/mikesinclair66/NewPortfolio" target="_blank">
                         <OnHoverIcon iconSrc="/graphics/media/github_black.png"
                         hoverSrc="/graphics/media/github.png" alt="Michael&#39;s Github"
                         desktopImplementation={desktopImplementation} />

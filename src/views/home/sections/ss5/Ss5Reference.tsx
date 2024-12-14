@@ -19,7 +19,7 @@ const CloudRender: React.FC<CRProps> = ({ position, opacity }) => {
     });
   
     return (
-        <sprite position={position} scale={[2.6, 2.6, 1]} material={material} />
+        <sprite position={position} scale={[3, 3, 1]} material={material} />
     );
 };
 
@@ -33,6 +33,8 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
     const OPACITY_TRANSITION_IN = .2, OPACITY_TRANSITION_OUT = .1;
     const ZSIGHT_MODERATOR = -2;
 
+    const [zlengthRecord, setZlengthRecord] = useState<number>(-1);
+
     const XDISPERSION = 1.8;
 
     const FLOOR_LEVEL_DISPLACEMENT = useRef<number>(desktopImplementation? -1.5 : 0);
@@ -40,31 +42,31 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
     const getRangeValue = (range: number[]) => get_random_float(range[1], range[0])
 
     //ZGAP[0] must be greater or equal to OPACITY_TRANSITION_OUT * 2 so that each CLUTTER_SET's opacity can be smoothly adjusted to
-    const ZGAP = [.225, .45], ZCLUTTER = [2, 4];
+    const ZGAP = [.225, .45], ZCLUTTER = [2, 3];
     let clutterCount = 0, clutterSetAmount = Math.floor(getRangeValue(ZCLUTTER));
 
     const CLUTTER_SETS = useRef<number[][]>([[]]);
-    /*
     const CLUTTER_SET_ITERATIONS = useRef<number[]>([0]);
     const CLUTTER_SET_DISTANCE_OPACITIES = useRef<number[]>([1]);
-    */
 
     const [clutterSets, setClutterSets] = useState<number[][]>([]);
     //const [clutterSetIterations, setClutterSetIterations] = useState<number[]>([]);
 
-    /*
     //opacity variables
-    const [clutterSetDistanceOpacities, setClutterSetDistanceOpacities] = useState<number[]>([]);
+    //const [clutterSetDistanceOpacities, setClutterSetDistanceOpacities] = useState<number[]>([]);
+    /*
     const [clutterSetsTransitioningIn, setClutterSetsTransitioningIn] = useState<number[]>([]);
     const [spawnTimeRecords, setSpawnTimeRecords] = useState<number[]>([]);
+    */
 
+    /*
     const setClutterSetDistanceOpacity = (value: number, index: number) => {
         setClutterSetDistanceOpacities(clutterSetDistanceOpacities.map((opacity: number, opacityIndex: number) => (opacityIndex
             === index? value : opacity)));
     }
             */
 
-    const getZSpawnDisplacement = (cloudIndex: number, currentZlength: number) => {
+    const getZSpawnDisplacement = (cloudIndex: number) => {
         let displacement = 0;
         if(CLUTTER_SETS.current){
             CLUTTER_SETS.current[CLUTTER_SETS.current.length - 1].push(cloudIndex);
@@ -73,8 +75,12 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
                 clutterSetAmount = Math.floor(getRangeValue(ZCLUTTER));
                 clutterCount = 0;
     
-                displacement = getRangeValue(ZGAP);
-                CLUTTER_SETS.current.push([]);
+                if(CLUTTER_SETS.current){
+                    displacement = getRangeValue(ZGAP);
+                    CLUTTER_SETS.current.push([]);
+                    CLUTTER_SET_ITERATIONS.current.push(0);
+                    CLUTTER_SET_DISTANCE_OPACITIES.current.push(1);
+                }
             }
         }
 
@@ -82,39 +88,35 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
     }
 
     useEffect(() => {
-        if(desktopImplementation){
+        if(desktopImplementation)
             FLOOR_LEVEL_DISPLACEMENT.current = -1.5;
-        } else {
+        else
             FLOOR_LEVEL_DISPLACEMENT.current = 0;
-        }
     }, [desktopImplementation]);
 
-    const [cloudXYZs, setCloudXYZs] = useState<THREE.Vector3[]>([]);
-    const ZLENGTH_RECORD = useRef<number>(0);
+    const [cloudXYZs, setCloudXYZs] = useState<number[][]>([]);
 
     useEffect(() => {
-        let temp: THREE.Vector3[] = [];
+        let temp: number[][] = [];
 
         let x = -xlevels * XDISPERSION;
         let zlength = 0;
-        while(zlength < distance){
-            temp.push(new THREE.Vector3(x, FLOOR_LEVEL_DISPLACEMENT.current, -zlength));
+        while(zlength > -distance){
+            temp.push([Number(x.toFixed(4)), FLOOR_LEVEL_DISPLACEMENT.current, Number(zlength.toFixed(4))]);
 
             x += XDISPERSION;
             if(x > xlevels * XDISPERSION)
                 x = -xlevels * XDISPERSION;
 
-            zlength += getZSpawnDisplacement(temp.length - 1, zlength);
+            zlength -= getZSpawnDisplacement(temp.length - 1);
         }
 
-        ZLENGTH_RECORD.current = zlength;
-
+        setZlengthRecord(zlength);
         setCloudXYZs(temp);
+
         setClutterSets(CLUTTER_SETS.current);
-        /*
-        setClutterSetIterations(CLUTTER_SET_ITERATIONS.current);
-        setClutterSetDistanceOpacities(CLUTTER_SET_DISTANCE_OPACITIES.current);
-        */
+        //setClutterSetIterations(CLUTTER_SET_ITERATIONS.current);
+        //setClutterSetDistanceOpacities(CLUTTER_SET_DISTANCE_OPACITIES.current);
     }, []);
 
     /*
@@ -139,12 +141,13 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
             setSpawnTimeRecords(stillIncluded.spawnTimeRecords);
 
             //since every cloud within a clutter set must have the same z, grab the first one we find
+            //causes exception from time to time - TODO
             let distanceToEnd: number = movingZ + cloudXYZs[clutterSets[CLUTTER_SET.current][0]][2];
-                + clutterSetIterations[CLUTTER_SET.current] * zlengthRecord;
+            //    + clutterSetIterations[CLUTTER_SET.current] * zlengthRecord;
 
             //clouds transitioning out
             if(distanceToEnd >= 0){
-                setClutterSetDistanceOpacity(0, CLUTTER_SET.current);
+                //setClutterSetDistanceOpacity(0, CLUTTER_SET.current);
                 setClutterSetIterations(clutterSetIterations.map(
                 (recordIteration: number, index: number) => recordIteration + (index === CLUTTER_SET.current? 1 : 0)));
 
@@ -154,11 +157,19 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
 
                 if(++CLUTTER_SET.current >= clutterSets.length)
                     CLUTTER_SET.current = 0;
-            } else if(distanceToEnd + OPACITY_TRANSITION_OUT >= 0)
+                debug_dict({
+                    clutterSet: CLUTTER_SET.current,
+                    cloudXYZs: cloudXYZs,
+                    cloudXYZlength: cloudXYZs.length
+                });
+            } 
+            else if(distanceToEnd + OPACITY_TRANSITION_OUT >= 0)
                 setClutterSetDistanceOpacity(-1 * (distanceToEnd / OPACITY_TRANSITION_OUT), CLUTTER_SET.current);
         }
     });
+    */
 
+    /*
     useEffect(() => {
         debug_dict({
             clutterSetsTransitioningIn: clutterSetsTransitioningIn
@@ -172,64 +183,29 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
     }, [spawnTimeRecords]);
     */
 
-    const ZCLUTTER_ITER = useRef<number>(0);
-    let print = false;
-    useFrame(() => {
-        if(cloudXYZs.length > 0){
-            /*
-            if(!print){
-                debug_dict({
-                    clutterSets: CLUTTER_SETS.current
-                }, true);
-                print = true;
-            }
-            */
-           /*
-            debug_dict({
-                zIteration: ZCLUTTER_ITER.current,
-                zPane: cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z,
-                zPaneConcatenated: cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z + movingZ,
-                movingZ: movingZ,
-                progress: (ZCLUTTER_ITER.current + 1) / CLUTTER_SETS.current.length
-            });
-            */
-            if(cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z + movingZ >= 0){
-                //console.log(`Iterating at zpane=${cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z}`);
-                if(ZCLUTTER_ITER.current + 1 < CLUTTER_SETS.current.length){
-                    debug_dict({
-                        clutterSetToTranslate: CLUTTER_SETS.current[ZCLUTTER_ITER.current]
-                    })
-                    for(let i = 0; i < CLUTTER_SETS.current[ZCLUTTER_ITER.current].length; i++){
-                        //let str = `Moving from ${cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][i]].z}`;
-                        cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][i]].z -= ZLENGTH_RECORD.current;
-                        //str += ' to ' + cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][i]].z;
-                        //console.log(str);
-                    }
-                    ++ZCLUTTER_ITER.current;
-                    debug_dict({
-                        clutterIter: ZCLUTTER_ITER.current,
-                        length: CLUTTER_SETS.current.length,
-                        clutterSet: CLUTTER_SETS.current[ZCLUTTER_ITER.current],
-                        //xyzZ: cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z
-                    }, true);
-                } else {
-                    for(let i = 0; i < ZCLUTTER_ITER.current - 1; i++)
-                        for(let j = 0; j < CLUTTER_SETS.current[i].length; j++)
-                            cloudXYZs[CLUTTER_SETS.current[i][j]].z += ZLENGTH_RECORD.current;
-                    console.log('reset! first cloud is at a z of ' + cloudXYZs[0].z);
-                    ZCLUTTER_ITER.current = 0;
-                }
-            }
-        }
-    });
-
+    const ZCLUTTER_ITERATOR = useRef<number>(0);
     return (
         <>
             { clutterSets.map((clutter: number[], clutterSetIndex: number) => (
                 <group key={`cloud-group-${clutterSetIndex}`}>
-                    { clutter.map((cloudIndex: number, indexWithinClutterSet: number) => <CloudRender
-                    position={new THREE.Vector3(cloudXYZs[cloudIndex].x, cloudXYZs[cloudIndex].y,
-                    cloudXYZs[cloudIndex].z - ZSIGHT_MODERATOR)} key={`cloud-${cloudIndex}`} opacity={1} />) }
+                    { clutter.map((cloudIndex: number, indexWithinClutterSet: number) => {
+                        if(!CLUTTER_SETS.current[ZCLUTTER_ITERATOR.current].includes(cloudIndex)){
+                            if(ZCLUTTER_ITERATOR.current + 1 < CLUTTER_SETS.current.length)
+                                ++ZCLUTTER_ITERATOR.current;
+                            else {
+                                ZCLUTTER_ITERATOR.current = 0;
+                                for(let cloudXYZ of cloudXYZs)
+                                    cloudXYZ[2] += Math.abs(cloudXYZs[cloudXYZs.length - 1][2]);
+                            }
+                        }
+                        if(cloudXYZs[cloudIndex][2] + movingZ >= 0)
+                            cloudXYZs[cloudIndex][2] -= zlengthRecord;
+
+                        return (
+                            <CloudRender position={new THREE.Vector3(cloudXYZs[cloudIndex][0], cloudXYZs[cloudIndex][1],
+                            cloudXYZs[cloudIndex][2] - ZSIGHT_MODERATOR)} key={`cloud-${cloudIndex}`} opacity={1} />
+                        )
+                    }) }
                 </group>
             )) }
         </>
