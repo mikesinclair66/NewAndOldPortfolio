@@ -27,9 +27,10 @@ interface CProps {
     xlevels: number;
     distance: number;
     movingZ: number;
+    setMovingZ: (val: number) => void;
     desktopImplementation: boolean;
 }
-const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplementation }) => {
+const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, setMovingZ, desktopImplementation }) => {
     const OPACITY_TRANSITION_IN = .2, OPACITY_TRANSITION_OUT = .1;
     const XDISPERSION = 1.8;
     const FLOOR_LEVEL_DISPLACEMENT = useRef<number>(desktopImplementation? -1.5 : 0);
@@ -40,7 +41,7 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
     const ZGAP = [.225, .45], ZCLUTTER = [2, 4];
     let clutterCount = 0, clutterSetAmount = Math.floor(getRangeValue(ZCLUTTER));
 
-    const CLUTTER_SETS = useRef<number[][]>([[]]);
+    const CLUTTER_SETS = useRef<number[][]>([]);
 
     const [clutterSets, setClutterSets] = useState<number[][]>([]);
 
@@ -56,9 +57,14 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
     }
             */
 
+    const NEW_CLUTTER_SET_AWAITING = useRef<boolean>(true);
     const getZSpawnDisplacement = (cloudIndex: number, currentZlength: number) => {
         let displacement = 0;
         if(CLUTTER_SETS.current){
+            if(NEW_CLUTTER_SET_AWAITING.current){
+                NEW_CLUTTER_SET_AWAITING.current = false;
+                CLUTTER_SETS.current.push([]);
+            }
             CLUTTER_SETS.current[CLUTTER_SETS.current.length - 1].push(cloudIndex);
 
             if(clutterCount++ === clutterSetAmount){
@@ -66,7 +72,9 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
                 clutterCount = 0;
     
                 displacement = getRangeValue(ZGAP);
-                CLUTTER_SETS.current.push([]);
+
+                //this method may not get called again, so preload a new set to be placed if it does
+                NEW_CLUTTER_SET_AWAITING.current = true;
             }
         }
 
@@ -113,17 +121,20 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
                     for(let i = 0; i < CLUTTER_SETS.current[ZCLUTTER_ITER.current].length; i++)
                         cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][i]].z -= ZLENGTH_RECORD.current;
                     ++ZCLUTTER_ITER.current;
+                    /*
                     debug_dict({
                         clutterIter: ZCLUTTER_ITER.current,
                         length: CLUTTER_SETS.current.length,
                         clutterSet: CLUTTER_SETS.current[ZCLUTTER_ITER.current],
                         //xyzZ: cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z
                     }, true);
+                    */
                 } else {
                     for(let i = 0; i < ZCLUTTER_ITER.current - 1; i++)
                         for(let j = 0; j < CLUTTER_SETS.current[i].length; j++)
                             cloudXYZs[CLUTTER_SETS.current[i][j]].z += ZLENGTH_RECORD.current;
                     ZCLUTTER_ITER.current = 0;
+                    setMovingZ(0);
                 }
             }
         }
@@ -176,7 +187,8 @@ const Ss5: React.FC<Ss5Props> = ({ desktopImplementation }) => {
                 <ambientLight intensity={0.8} />
                 <pointLight position={[10, 10, 10]} />
 
-                <Clouds xlevels={3} distance={3} movingZ={movingZ} desktopImplementation={desktopImplementation} />
+                <Clouds xlevels={3} distance={3} movingZ={movingZ} setMovingZ={setMovingZ}
+                desktopImplementation={desktopImplementation} />
             </Canvas>
         </div>
     )
