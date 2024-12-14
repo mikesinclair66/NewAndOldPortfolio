@@ -31,26 +31,18 @@ interface CProps {
 }
 const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplementation }) => {
     const OPACITY_TRANSITION_IN = .2, OPACITY_TRANSITION_OUT = .1;
-    const ZSIGHT_MODERATOR = -2;
-
     const XDISPERSION = 1.8;
-
     const FLOOR_LEVEL_DISPLACEMENT = useRef<number>(desktopImplementation? -1.5 : 0);
+    const ZSIGHT_MODERATOR = -2;
 
     const getRangeValue = (range: number[]) => get_random_float(range[1], range[0])
 
-    //ZGAP[0] must be greater or equal to OPACITY_TRANSITION_OUT * 2 so that each CLUTTER_SET's opacity can be smoothly adjusted to
     const ZGAP = [.225, .45], ZCLUTTER = [2, 4];
     let clutterCount = 0, clutterSetAmount = Math.floor(getRangeValue(ZCLUTTER));
 
     const CLUTTER_SETS = useRef<number[][]>([[]]);
-    /*
-    const CLUTTER_SET_ITERATIONS = useRef<number[]>([0]);
-    const CLUTTER_SET_DISTANCE_OPACITIES = useRef<number[]>([1]);
-    */
 
     const [clutterSets, setClutterSets] = useState<number[][]>([]);
-    //const [clutterSetIterations, setClutterSetIterations] = useState<number[]>([]);
 
     /*
     //opacity variables
@@ -111,100 +103,15 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
 
         setCloudXYZs(temp);
         setClutterSets(CLUTTER_SETS.current);
-        /*
-        setClutterSetIterations(CLUTTER_SET_ITERATIONS.current);
-        setClutterSetDistanceOpacities(CLUTTER_SET_DISTANCE_OPACITIES.current);
-        */
     }, []);
 
-    /*
-    const CLUTTER_SET = useRef<number>(0);//, PREV_CLUTTER_SET = useRef<number>(0);
-    useFrame(() => {
-        if(cloudXYZs.length > 0){
-            //clouds transitioning in
-            let stillIncluded: { [key: string]: number[] } = {
-                clutterSetsTransitioningIn: [],
-                spawnTimeRecords: []
-            };
-            for(let i = 0; i < clutterSetsTransitioningIn.length; i++){
-                let opacityRatio = (movingZ - spawnTimeRecords[i]) / OPACITY_TRANSITION_IN;
-                setClutterSetDistanceOpacity(opacityRatio, clutterSetsTransitioningIn[i]);
-
-                if(opacityRatio < 1){
-                    stillIncluded.clutterSetsTransitioningIn.push(clutterSetsTransitioningIn[i]);
-                    stillIncluded.spawnTimeRecords.push(spawnTimeRecords[i]);
-                }
-            }
-            setClutterSetsTransitioningIn(stillIncluded.clutterSetsTransitioningIn);
-            setSpawnTimeRecords(stillIncluded.spawnTimeRecords);
-
-            //since every cloud within a clutter set must have the same z, grab the first one we find
-            let distanceToEnd: number = movingZ + cloudXYZs[clutterSets[CLUTTER_SET.current][0]][2];
-                + clutterSetIterations[CLUTTER_SET.current] * zlengthRecord;
-
-            //clouds transitioning out
-            if(distanceToEnd >= 0){
-                setClutterSetDistanceOpacity(0, CLUTTER_SET.current);
-                setClutterSetIterations(clutterSetIterations.map(
-                (recordIteration: number, index: number) => recordIteration + (index === CLUTTER_SET.current? 1 : 0)));
-
-                //record time of clouds transitioning in
-                setClutterSetsTransitioningIn([...clutterSetsTransitioningIn, CLUTTER_SET.current]);
-                setSpawnTimeRecords([...spawnTimeRecords, movingZ]);
-
-                if(++CLUTTER_SET.current >= clutterSets.length)
-                    CLUTTER_SET.current = 0;
-            } else if(distanceToEnd + OPACITY_TRANSITION_OUT >= 0)
-                setClutterSetDistanceOpacity(-1 * (distanceToEnd / OPACITY_TRANSITION_OUT), CLUTTER_SET.current);
-        }
-    });
-
-    useEffect(() => {
-        debug_dict({
-            clutterSetsTransitioningIn: clutterSetsTransitioningIn
-        }, true);
-    }, [clutterSetsTransitioningIn]);
-
-    useEffect(() => {
-        debug_dict({
-            spawnTimeRecords: spawnTimeRecords
-        }, true);
-    }, [spawnTimeRecords]);
-    */
-
     const ZCLUTTER_ITER = useRef<number>(0);
-    let print = false;
     useFrame(() => {
         if(cloudXYZs.length > 0){
-            /*
-            if(!print){
-                debug_dict({
-                    clutterSets: CLUTTER_SETS.current
-                }, true);
-                print = true;
-            }
-            */
-           /*
-            debug_dict({
-                zIteration: ZCLUTTER_ITER.current,
-                zPane: cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z,
-                zPaneConcatenated: cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z + movingZ,
-                movingZ: movingZ,
-                progress: (ZCLUTTER_ITER.current + 1) / CLUTTER_SETS.current.length
-            });
-            */
             if(cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z + movingZ >= 0){
-                //console.log(`Iterating at zpane=${cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][0]].z}`);
                 if(ZCLUTTER_ITER.current + 1 < CLUTTER_SETS.current.length){
-                    debug_dict({
-                        clutterSetToTranslate: CLUTTER_SETS.current[ZCLUTTER_ITER.current]
-                    })
-                    for(let i = 0; i < CLUTTER_SETS.current[ZCLUTTER_ITER.current].length; i++){
-                        //let str = `Moving from ${cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][i]].z}`;
+                    for(let i = 0; i < CLUTTER_SETS.current[ZCLUTTER_ITER.current].length; i++)
                         cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][i]].z -= ZLENGTH_RECORD.current;
-                        //str += ' to ' + cloudXYZs[CLUTTER_SETS.current[ZCLUTTER_ITER.current][i]].z;
-                        //console.log(str);
-                    }
                     ++ZCLUTTER_ITER.current;
                     debug_dict({
                         clutterIter: ZCLUTTER_ITER.current,
@@ -216,7 +123,6 @@ const Clouds: React.FC<CProps> = ({ xlevels, distance, movingZ, desktopImplement
                     for(let i = 0; i < ZCLUTTER_ITER.current - 1; i++)
                         for(let j = 0; j < CLUTTER_SETS.current[i].length; j++)
                             cloudXYZs[CLUTTER_SETS.current[i][j]].z += ZLENGTH_RECORD.current;
-                    console.log('reset! first cloud is at a z of ' + cloudXYZs[0].z);
                     ZCLUTTER_ITER.current = 0;
                 }
             }
