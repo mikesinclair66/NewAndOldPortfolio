@@ -84,76 +84,78 @@ const Ss3: React.FC<Ss3Props> = ({ desktopImplementation, getInTouch }) => {
                 </div>
             </div>
 
-            <div className="experience-container align-center">
-                <div className={`experience${desktopImplementation ? ' align-horizontal' : ""}`}>
-                    <div className="experience-header">
+            <div id="experience-section">
+                <div className="experience-container align-center">
+                    <div className={`experience${desktopImplementation ? ' align-horizontal' : ""}`}>
+                        <div className="experience-header">
+                            <div>
+                                <h4>EDUCATION</h4>
+                                <span></span>
+                            </div>
+                        </div>
+
                         <div>
-                            <h4>EDUCATION</h4>
-                            <span></span>
-                        </div>
-                    </div>
+                            <div className="experience-group">
+                                <h5>Bachelor of Technology (Game Development Option)</h5>
+                                <div className="enrollment">British Columbia Institute of Technology
+                                (<a href="https://www.bcit.ca" target="_blank">BCIT</a>) &#8226; 2020 - Present</div>
+                                <p>Grouped in teams to complete large projects under strict deadlines. Extensive use of game engines
+                                    like Unity and frameworks like GLFW and OpenGLES for Desktop and iOS development. Learned agile
+                                    methods to work as a team. Participated in hackathons and group events.</p>
+                            </div>
 
-                    <div>
-                        <div className="experience-group">
-                            <h5>Bachelor of Technology (Game Development Option)</h5>
-                            <div className="enrollment">British Columbia Institute of Technology
-                            (<a href="https://www.bcit.ca" target="_blank">BCIT</a>) &#8226; 2020 - Present</div>
-                            <p>Grouped in teams to complete large projects under strict deadlines. Extensive use of game engines
-                                like Unity and frameworks like GLFW and OpenGLES for Desktop and iOS development. Learned agile
-                                methods to work as a team. Participated in hackathons and group events.</p>
-                        </div>
-
-                        <div className="experience-group">
-                            <h5>Diploma in Computer Systems Technology (Business Ideation Option)</h5><div className='enrollment'>
-                            <a href="https://www.bcit.ca" target="_blank">BCIT</a> &#8226; 2018 - 2020</div>
-                            <p>Prior to my experience here, I was self-taught, so I learned very quickly all programming-related
-                                topics here at BCIT and polished my understanding of software design patterns. Learned full-stack,
-                                UI/UX techniques, OOP, and procedural programming with C.
-                            </p>
+                            <div className="experience-group">
+                                <h5>Diploma in Computer Systems Technology (Business Ideation Option)</h5><div className='enrollment'>
+                                <a href="https://www.bcit.ca" target="_blank">BCIT</a> &#8226; 2018 - 2020</div>
+                                <p>Prior to my experience here, I was self-taught, so I learned very quickly all programming-related
+                                    topics here at BCIT and polished my understanding of software design patterns. Learned full-stack,
+                                    UI/UX techniques, OOP, and procedural programming with C.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="experience-container align-center">
-                <div className={`experience${desktopImplementation ? ' align-horizontal' : ''}`}>
-                    <div className="experience-header">
+                <div className="experience-container align-center">
+                    <div className={`experience${desktopImplementation ? ' align-horizontal' : ''}`}>
+                        <div className="experience-header">
+                            <div>
+                                <h4>EXPERIENCE</h4>
+                                <span></span>
+                            </div>
+                        </div>
+
                         <div>
-                            <h4>EXPERIENCE</h4>
-                            <span></span>
-                        </div>
-                    </div>
+                            <div className='experience-group'>
+                                <h5>Software Developer / Engineer</h5>
+                                <div className="enrollment">
+                                <a href="https://intivatechnologies.ca" target="_blank">Intiva Technologies</a> &#8226;
+                                December 2020 - Present</div>
+                                <ul>
+                                    <li>Marketed and developed products for over ten companies
+                                        including websites, cards, logos, and signs.</li>
+                                    <li>Supercharged development process of websites and web
+                                        apps by engineering software to produce code repositories.</li>
+                                    <li>Routed full-stack web apps to be loaded with NGINX.</li>
+                                    <li>Learned how to integrate with complex libraries and API’s.</li>
+                                </ul>
+                            </div>
 
-                    <div>
-                        <div className='experience-group'>
-                            <h5>Software Developer / Engineer</h5>
-                            <div className="enrollment">
-                            <a href="https://intivatechnologies.ca" target="_blank">Intiva Technologies</a> &#8226;
-                            December 2020 - Present</div>
-                            <ul>
-                                <li>Marketed and developed products for over ten companies
-                                    including websites, cards, logos, and signs.</li>
-                                <li>Supercharged development process of websites and web
-                                    apps by engineering software to produce code repositories.</li>
-                                <li>Routed full-stack web apps to be loaded with NGINX.</li>
-                                <li>Learned how to integrate with complex libraries and API’s.</li>
-                            </ul>
-                        </div>
-
-                        <div className='experience-group'>
-                            <h5>Electronics / Arcade Technician</h5>
-                            <div className="enrollment">
-                            <a href="https://www.cineplex.com" target="_blank">Cineplex</a>
-                            &#160;&#8226; December 2023 - May 2024</div>
-                            <ul>
-                                <li>Applied my understanding of software and control systems
-                                    to troubleshoot problems with arcade mechanisms</li>
-                                <li>Gained valuable insights on the industry and its market.</li>
-                                <li>Had to be able to perform well in a high-pressure
-                                    environment and think on the spot.</li>
-                                <li>Performed administrative duties to troubleshoot problems
-                                    with electronic components.</li>
-                            </ul>
+                            <div className='experience-group'>
+                                <h5>Electronics / Arcade Technician</h5>
+                                <div className="enrollment">
+                                <a href="https://www.cineplex.com" target="_blank">Cineplex</a>
+                                &#160;&#8226; December 2023 - May 2024</div>
+                                <ul>
+                                    <li>Applied my understanding of software and control systems
+                                        to troubleshoot problems with arcade mechanisms</li>
+                                    <li>Gained valuable insights on the industry and its market.</li>
+                                    <li>Had to be able to perform well in a high-pressure
+                                        environment and think on the spot.</li>
+                                    <li>Performed administrative duties to troubleshoot problems
+                                        with electronic components.</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
