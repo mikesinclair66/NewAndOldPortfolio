@@ -74,8 +74,9 @@ export const useScrollTransition = (tvVaporized: boolean, setTvVaporized: any, d
                         let crect = container?.getBoundingClientRect();
 
                         // coords are within container
-                        return (container != undefined && crect != undefined && coords[0] >= crect.left
-                        && coords[0]< crect.left + crect.width && coords[1] >= crect.top && coords[1] < crect.top + crect.height)
+                        return (container != undefined && crect != undefined
+                        && coords[0] >= crect.left && coords[0]< crect.left  + crect.width
+                        && coords[1] >= crect.top && coords[1] < crect.top + crect.height)
                         
                         &&
                         
@@ -134,9 +135,11 @@ export const useScrollTransition = (tvVaporized: boolean, setTvVaporized: any, d
 
     const scrollVisible = useRef<boolean>(false);
 
+    /* -- DISABLED FOR TESTING
     useEffect(() => {
         handleScrollTransition(sectionId);
     }, [sectionId]);
+    */
 
     useEffect(() => {
         if(desktopImplementation){

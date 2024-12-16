@@ -57,11 +57,11 @@ const Ss4: React.FC<Ss4Props> = ({ desktopImplementation }) => {
 
                             <div className="ch-container">
                                 <div className={`collapse-hidden${collapseActive == 0 ? '-joking' : ''}`}>
-                                    <p>I&#39;m best suited for Vue, but I used React to create this app since I enjoy it more.
-                                        I&#39;m gifted with plenty of experience in JavaScript. I spent a lot of my upbringing coding
-                                        and designing static websites using only the vanilla languages. Once I had started
-                                        on Vue, I began to challenge myself and took on full-stack web apps using a variety of
-                                        frameworks.</p>
+                                    <p>I have the most experience with Vue, but I&#39;ve used React (with NextJs) to create many
+                                        apps since I enjoy it more. I&#39;m gifted with plenty of experience in JavaScript. I spent
+                                        a lot of my upbringing coding and designing static websites using only the vanilla languages.
+                                        Once I had started on Vue, I began to challenge myself and took on full-stack web apps using a
+                                        variety of frameworks.</p>
                                 </div>
 
                                 <div className={`collapse-hidden${collapseActive == 1 ? '-joking' : ''}`}>
